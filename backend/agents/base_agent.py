@@ -64,8 +64,7 @@ COLUMN DETAILS:
             prompt += f"\n    Type: {col_info.get('dtype', 'unknown')}"
             prompt += f"\n    Unique values: {col_info.get('unique_values', 0)}"
             prompt += f"\n    Missing: {col_info.get('null_percentage', 0)}%"
-            samples = col_info.get('sample_values', [])
-            if samples:
+            if samples := col_info.get('sample_values', []):
                 prompt += f"\n    Examples: {samples}"
 
         prompt += "\n\nProvide your analysis as JSON only."
@@ -82,7 +81,7 @@ COLUMN DETAILS:
         if not isinstance(response, str) or not response.strip():
             return {
                 "error": "LLM returned empty or invalid response",
-                "raw_response": str(response),
+                "raw_response": (response),
                 "agent_name": self.agent_name
         }
         try:
