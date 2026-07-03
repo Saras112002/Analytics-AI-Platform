@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from backend.pipelines.file_processor import read_file, generate_summary
 from backend.agents.insight_agent import insight_agent
 from backend.config import get_settings
+from backend.agents.orchestrator import run_all
 
 settings = get_settings()
 router = APIRouter()
@@ -45,19 +46,13 @@ async def analyze_file(request: AnalyzeRequest):
     # Step 4 - Generate summary (same as upload endpoint)
     summary = generate_summary(df, request.filename)
 
-    # Step 5 - Send to AI agent for analysis
-    try:
-        insights = insight_agent.analyze(summary)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"AI analysis failed: {str(e)}"
-        )
+    # Step 5 — fan out to all agents
+    analysis = run_all(summary)
 
-    # Step 6 - Return everything to the user
+# Step 6
     return {
-        "message": "Analysis complete",
-        "filename": request.filename,
-        "summary": summary,
-        "ai_insights": insights
-    }
+    "message": "Analysis complete",
+    "filename": request.filename,
+    "summary": summary,
+    "ai_analysis": analysis,   # was "ai_insights"
+}

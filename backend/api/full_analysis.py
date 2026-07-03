@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from backend.pipelines.file_processor import read_file, generate_summary
 from backend.agents.orchestrator import orchestrator
 from backend.config import get_settings
-
+from backend.ml.anomaly_detector import detect_anomalies
 settings = get_settings()
 router = APIRouter()
 
@@ -45,6 +45,7 @@ async def full_analysis(request: FullAnalysisRequest):
 
     # Step 4 - Generate data summary
     summary = generate_summary(df, request.filename)
+    summary["anomaly_evidence"] = detect_anomalies(df)
 
     # Step 5 - Run the full orchestrator (all 4 agents)
     start_time = time.time()
