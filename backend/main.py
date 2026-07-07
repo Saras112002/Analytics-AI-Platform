@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.config import get_settings
 from backend.api.upload import router as upload_router
-from backend.api.analyze import router as analyze_router
 from backend.api.full_analysis import router as full_analysis_router
 settings = get_settings()
 
@@ -21,7 +20,6 @@ app.add_middleware(
 
 # Connect routers
 app.include_router(upload_router, prefix="/api")
-app.include_router(analyze_router, prefix="/api")
 app.include_router(full_analysis_router, prefix="/api")
 @app.get("/")
 def root():

@@ -64,5 +64,6 @@ async def full_analysis(request: FullAnalysisRequest):
         "filename": request.filename,
         "execution_time_seconds": elapsed,
         "data_summary": summary,
-        "analysis": analysis
+        "analysis": analysis,
+        "disclaimer": "AI-generated draft. All figures must be verified against source data before use in decisions.",
     }

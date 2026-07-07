@@ -42,3 +42,5 @@ desktop.ini
 test_key.py
 test_llm.py
 test_agent.py
+test.py
+test_full.py

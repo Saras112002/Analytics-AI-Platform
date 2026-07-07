@@ -1,5 +1,4 @@
 import json
-from urllib import response
 from backend.tools.llm_client import llm
 
 
@@ -72,30 +71,37 @@ COLUMN DETAILS:
 
     def _parse_response(self, response: str) -> dict:
         if response is None:
-            return {
-                "error": "LLM returned no response",
-                "raw_response": None,
-                "agent_name": self.agent_name
-        }
-    
+            return {"error": "LLM returned no response",
+                    "raw_response": None, "agent_name": self.agent_name}
+
         if not isinstance(response, str) or not response.strip():
-            return {
-                "error": "LLM returned empty or invalid response",
-                "raw_response": (response),
-                "agent_name": self.agent_name
-        }
+            return {"error": "LLM returned empty or invalid response",
+                    "raw_response": response, "agent_name": self.agent_name}
+
+        text = response.strip()
+
+        # 1. Strip markdown fences (```json ... ``` or ``` ... ```)
+        if "```" in text:
+            parts = text.split("```")
+            if len(parts) >= 2:
+                candidate = parts[1]
+                if candidate.lstrip().lower().startswith("json"):
+                    candidate = candidate.split("\n", 1)[1] if "\n" in candidate else candidate
+                text = candidate.strip()
+
+        # 2. Direct parse
         try:
-            cleaned = response.strip()
-            if cleaned.startswith("```"):
-                cleaned = cleaned.split("\n", 1)[1] if "\n" in cleaned else cleaned
-                if cleaned.endswith("```"):
-                    cleaned = cleaned.rsplit("```", 1)[0]
-
-            return json.loads(cleaned)
-
+            return json.loads(text)
         except json.JSONDecodeError:
-            return {
-                "error": "JSON parsing failed",
-                "raw_response": response,
-                "agent_name": self.agent_name
-            }
+            pass
+
+        # 3. Fallback: extract the outermost { ... }, handles preamble/postamble
+        start, end = text.find("{"), text.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            try:
+                return json.loads(text[start:end + 1])
+            except json.JSONDecodeError:
+                pass
+
+        return {"error": "JSON parsing failed",
+                "raw_response": response, "agent_name": self.agent_name}

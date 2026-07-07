@@ -45,7 +45,7 @@ You ONLY surface what matters most.
 Writing style rules:
 - Sentences under 20 words
 - Active voice
-- Specific numbers when available
+- Cite numbers ONLY when they appear in the agent findings above; never invent figures
 - No business buzzwords ("synergy", "leverage", "ecosystem")
 
 Format your response as JSON with these exact keys:
@@ -54,8 +54,7 @@ Format your response as JSON with these exact keys:
     "top_actions": [
         {
             "action": "what to do",
-            "why_now": "urgency reasoning",
-            "expected_outcome": "specific measurable result"
+            "why_now": "urgency reasoning grounded ONLY in numbers from the findings above"
         }
     ],
     "biggest_risks": ["risk 1", "risk 2"],
@@ -122,7 +121,17 @@ Limit top_actions to maximum 3. Return ONLY valid JSON."""
             prompt += json.dumps(strategy, indent=2)
             prompt += "\n\n"
 
-        prompt += "Now synthesize the above into an executive brief as JSON."
+        prompt += (
+            "\n\nGROUNDING RULES (mandatory, apply to EVERY field including "
+            "headline, why_now, bottom_line, and biggest_risks):"
+            "\n- Every number, dollar amount, percentage, and count must appear "
+            "verbatim in the findings above. If it is not there, do not write it."
+            "\n- Do NOT compute, estimate, or infer new numbers (no margins, no ROI, "
+            "no loss totals) unless that exact figure is in the findings."
+            "\n- When you have no grounded number, describe direction in words only."
+            "\n- Recommendations are hypotheses to test, not guaranteed results."
+            "\n\nNow synthesize the above into an executive brief as JSON."
+        )
         return prompt
 
 
