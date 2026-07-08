@@ -6,7 +6,19 @@ class InsightAgent(BaseAgent):
     Specialized AI agent for generating business insights
     Identifies patterns, trends, and key observations from data
     """
-
+    def _build_prompt(self, data_summary: dict) -> str:
+        prompt = super()._build_prompt(data_summary)
+        ev = data_summary.get("driver_evidence")
+        if ev and ev.get("drivers"):
+            tgt = ev["target"]
+            note = " (auto-selected)" if ev.get("target_auto_selected") else ""
+            prompt += f"\n\n--- COMPUTED DRIVERS (XGBoost predicting '{tgt}'{note}) ---\n"
+            prompt += f"Model quality: {ev['model_quality']}. Ran on {ev['compute_device']}.\n"
+            prompt += f"Feature importances: {ev['drivers']}\n"
+            prompt += ("\nExplain which features drive the target and how strongly, using ONLY these "
+                    "numbers. If model quality is weak or moderate, say the drivers are indicative, "
+                    "not definitive. Do not invent importances beyond this list.")
+        return prompt
     def __init__(self):
         super().__init__()
 
