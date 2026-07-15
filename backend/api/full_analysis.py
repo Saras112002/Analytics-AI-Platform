@@ -9,13 +9,16 @@ from backend.ml.anomaly_detector import detect_anomalies
 from backend.ml.feature_analyzer import analyze_drivers
 settings = get_settings()
 router = APIRouter()
-
+from typing import Optional
 
 class FullAnalysisRequest(BaseModel):
     """
-    Defines what the user must send to this endpoint
+    Defines what the user sends. They choose which analyses to run
+    and (optionally) which column to predict.
     """
     filename: str
+    analyses: list[str] = ["anomalies", "drivers", "summary"]
+    target_column: Optional[str] = None
 
 
 @router.post("/full-analysis")
@@ -47,7 +50,7 @@ async def full_analysis(request: FullAnalysisRequest):
     # Step 4 - Generate data summary
     summary = generate_summary(df, request.filename)
     summary["anomaly_evidence"] = detect_anomalies(df)
-    summary["driver_evidence"] = analyze_drivers(df)
+    summary["driver_evidence"] = analyze_drivers(df, target=request.target_column)
     # Step 5 - Run the full orchestrator (all 4 agents)
     start_time = time.time()
     try:

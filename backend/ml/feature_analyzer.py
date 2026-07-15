@@ -1,4 +1,5 @@
 import warnings
+warnings.filterwarnings("ignore", message=".*mismatched devices.*")
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -56,6 +57,7 @@ def analyze_drivers(df: pd.DataFrame, target: str = None, top_k: int = 8) -> dic
         return {"method": "xgboost", "status": "no_numeric_target", "target": None, "drivers": []}
 
     auto = not (target and target in df.columns)
+    target_not_found = bool(target) and target not in df.columns
     y = df[target_col]
     X = df.drop(columns=[target_col]).copy()
 
@@ -102,6 +104,7 @@ def analyze_drivers(df: pd.DataFrame, target: str = None, top_k: int = 8) -> dic
         "compute_device": device,
         "target": target_col,
         "target_auto_selected": auto,
+        "target_requested_but_missing": target_not_found,
         "problem_type": "classification" if classification else "regression",
         "model_quality": {metric: score, "interpretation": _quality_note(metric, score)},
         "excluded_id_columns": id_cols,
