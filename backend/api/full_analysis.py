@@ -49,9 +49,12 @@ async def full_analysis(request: FullAnalysisRequest):
 
     # Step 4 - Generate data summary
     summary = generate_summary(df, request.filename)
-    summary["anomaly_evidence"] = detect_anomalies(df)
-    summary["driver_evidence"] = analyze_drivers(df, target=request.target_column)
-    # Step 5 - Run the full orchestrator (all 4 agents)
+    # note: analyses[] controls ML computation only; all agents always run.
+    # Full per-agent control deferred to Phase 9 (needs SummaryAgent partial-input handling)
+    if "anomalies" in request.analyses:
+        summary["anomaly_evidence"] = detect_anomalies(df)
+    if "drivers" in request.analyses:
+        summary["driver_evidence"] = analyze_drivers(df, target=request.target_column)# Step 5 - Run the full orchestrator (all 4 agents)
     start_time = time.time()
     try:
         analysis = orchestrator.run(summary)
