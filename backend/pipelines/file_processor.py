@@ -2,7 +2,7 @@ import pandas as pd
 import os
 from pathlib import Path
 
-ALLOWED_EXTENSIONS = {".csv", ".xlsx", ".xls"}
+ALLOWED_EXTENSIONS = {".csv", ".xlsx", ".xls", ".json"}
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
 
 
@@ -12,7 +12,7 @@ def validate_file(filename: str, file_size: int) -> dict:
     if extension not in ALLOWED_EXTENSIONS:
         return {
             "valid": False,
-            "error": f"File type '{extension}' not allowed. Use CSV or Excel"
+            "error": f"File type '{extension}' not allowed. Use CSV, Excel, or JSON. Convert other formats first."
         }
 
     if file_size > MAX_FILE_SIZE:
@@ -21,39 +21,42 @@ def validate_file(filename: str, file_size: int) -> dict:
             "error": "File too large. Maximum size is 50MB"
         }
 
-    return {
-        "valid": True,
-        "error": None
-    }
+    return {"valid": True, "error": None}
 
 
 def read_file(filepath: str) -> pd.DataFrame:
     extension = Path(filepath).suffix.lower()
 
     if extension == ".csv":
-        # Try multiple encodings - real world files vary
         encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
         df = None
-
         for encoding in encodings:
             try:
                 df = pd.read_csv(filepath, encoding=encoding)
                 break
             except UnicodeDecodeError:
                 continue
-
         if df is None:
-            raise ValueError("Could not read file with any encoding")
+            raise ValueError("Could not read CSV with any known encoding")
 
     elif extension in [".xlsx", ".xls"]:
         df = pd.read_excel(filepath)
+
+    elif extension == ".json":
+        df = pd.read_json(filepath)
+        if not isinstance(df, pd.DataFrame) or df.empty:
+            raise ValueError("JSON could not be read as a table")
+
+    else:
+        raise ValueError(
+            f"Unsupported file type '{extension}'. Use CSV, Excel, or JSON."
+        )
 
     return df
 
 
 def extract_schema(df: pd.DataFrame) -> dict:
     schema = {}
-
     for column in df.columns:
         schema[column] = {
             "dtype": str(df[column].dtype),
@@ -64,13 +67,11 @@ def extract_schema(df: pd.DataFrame) -> dict:
             "unique_values": int(df[column].nunique()),
             "sample_values": df[column].dropna().head(3).tolist()
         }
-
     return schema
 
 
 def generate_summary(df: pd.DataFrame, filename: str) -> dict:
     schema = extract_schema(df)
-
     summary = {
         "filename": filename,
         "rows": len(df),
@@ -81,5 +82,4 @@ def generate_summary(df: pd.DataFrame, filename: str) -> dict:
         "has_missing_values": bool(df.isnull().any().any()),
         "missing_value_count": int(df.isnull().sum().sum())
     }
-
     return summary
