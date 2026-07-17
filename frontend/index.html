@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analytics AI</title>
+</head>
+<body>
+    <h1>Analytics AI Platform</h1>
+
+    <input type="file" id="fileInput">
+    <button type="button" onclick="uploadAndAnalyze()">Analyze</button>
+
+    <pre id="result">Results will appear here...</pre>
+
+    <script>
+        const API = "http://localhost:8000/api";
+
+        async function uploadAndAnalyze() {
+            const fileInput = document.getElementById("fileInput");
+            const result = document.getElementById("result");
+
+            if (!fileInput.files.length) {
+                result.textContent = "Please choose a file first.";
+                return;
+            }
+
+            result.textContent = "Uploading...";
+
+            // Step 1 - upload the actual file
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            const uploadRes = await fetch(`${API}/upload`, {
+                method: "POST",
+                body: formData
+            });
+            const uploadData = await uploadRes.json();
+
+            if (!uploadRes.ok) {
+                result.textContent = "Upload failed: " + JSON.stringify(uploadData);
+                return;
+            }
+
+            const filename = uploadData.summary.filename;
+            result.textContent = "Uploaded. Analyzing " + filename + "...";
+
+            // Step 2 - analyze by filename
+            const analyzeRes = await fetch(`${API}/full-analysis`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ filename: filename })
+            });
+            const analyzeData = await analyzeRes.json();
+
+            result.textContent = JSON.stringify(analyzeData, null, 2);
+        }
+    </script>
+</body>
+</html>
