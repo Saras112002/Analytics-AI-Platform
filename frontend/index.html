@@ -1,57 +1,143 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Analytics AI</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto;
+            padding: 0 20px; color: #1a1a2e; background: #f7f7fb; }
+        h1 { color: #16213e; }
+        .controls { background: #fff; padding: 20px; border-radius: 10px;
+                    box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 24px; }
+        button { background: #0f3460; color: #fff; border: none; padding: 10px 20px;
+                border-radius: 6px; cursor: pointer; font-size: 15px; }
+        button:hover { background: #16498a; }
+        .card { background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 18px;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        .card h2 { margin-top: 0; font-size: 16px; text-transform: uppercase;
+                letter-spacing: 0.5px; color: #0f3460; }
+        .headline { font-size: 18px; font-weight: 600; line-height: 1.4; }
+        .action { border-left: 3px solid #0f3460; padding-left: 12px; margin: 12px 0; }
+        .action .why { color: #555; font-size: 14px; }
+        .bar-row { display: flex; align-items: center; margin: 6px 0; }
+        .bar-label { width: 130px; font-size: 14px; }
+        .bar { height: 18px; background: #0f3460; border-radius: 3px; }
+        .bar-val { margin-left: 8px; font-size: 13px; color: #555; }
+        .muted { color: #777; font-size: 13px; }
+        .disclaimer { font-size: 13px; color: #a33; font-style: italic; }
+        .quality { display: inline-block; padding: 2px 8px; border-radius: 4px;
+                font-size: 13px; background: #e8eef7; color: #0f3460; }
+    </style>
 </head>
 <body>
     <h1>Analytics AI Platform</h1>
 
-    <input type="file" id="fileInput">
-    <button type="button" onclick="uploadAndAnalyze()">Analyze</button>
+    <div class="controls">
+        <input type="file" id="fileInput">
+        <button type="button" onclick="uploadAndAnalyze()">Analyze</button>
+        <p id="status" class="muted"></p>
+    </div>
 
-    <pre id="result">Results will appear here...</pre>
+    <div id="results"></div>
 
     <script>
         const API = "http://localhost:8000/api";
 
         async function uploadAndAnalyze() {
             const fileInput = document.getElementById("fileInput");
-            const result = document.getElementById("result");
+            const status = document.getElementById("status");
+            const results = document.getElementById("results");
+            results.innerHTML = "";
 
             if (!fileInput.files.length) {
-                result.textContent = "Please choose a file first.";
+                status.textContent = "Please choose a file first.";
                 return;
             }
 
-            result.textContent = "Uploading...";
-
-            // Step 1 - upload the actual file
+            status.textContent = "Uploading...";
             const formData = new FormData();
             formData.append("file", fileInput.files[0]);
 
-            const uploadRes = await fetch(`${API}/upload`, {
-                method: "POST",
-                body: formData
-            });
+            const uploadRes = await fetch(`${API}/upload`, { method: "POST", body: formData });
             const uploadData = await uploadRes.json();
-
             if (!uploadRes.ok) {
-                result.textContent = "Upload failed: " + JSON.stringify(uploadData);
+                status.textContent = "Upload failed: " + JSON.stringify(uploadData);
                 return;
             }
 
             const filename = uploadData.summary.filename;
-            result.textContent = "Uploaded. Analyzing " + filename + "...";
+            status.textContent = "Analyzing " + filename + "... (this takes ~15-25s)";
 
-            // Step 2 - analyze by filename
             const analyzeRes = await fetch(`${API}/full-analysis`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ filename: filename })
             });
-            const analyzeData = await analyzeRes.json();
+            const data = await analyzeRes.json();
 
-            result.textContent = JSON.stringify(analyzeData, null, 2);
+            status.textContent = "Done in " + data.execution_time_seconds + "s";
+            renderResults(data);
+        }
+
+        function renderResults(data) {
+            const results = document.getElementById("results");
+            const brief = data.analysis?.executive_brief || {};
+            const driver = data.data_summary?.driver_evidence;
+            const anomaly = data.data_summary?.anomaly_evidence;
+            let html = "";
+
+            // Headline + bottom line
+            if (brief.headline) {
+                html += `<div class="card"><h2>Executive Brief</h2>
+                    <p class="headline">${brief.headline}</p>
+                    <p>${brief.bottom_line || ""}</p></div>`;
+            }
+
+            // Top actions
+            if (brief.top_actions?.length) {
+                html += `<div class="card"><h2>Recommended Actions</h2>`;
+                brief.top_actions.forEach(a => {
+                    html += `<div class="action"><strong>${a.action}</strong>
+                            <div class="why">${a.why_now || ""}</div></div>`;
+                });
+                html += `</div>`;
+            }
+
+            // Driver importances as bars
+            if (driver?.drivers?.length) {
+                const q = driver.model_quality || {};
+                html += `<div class="card"><h2>What Drives ${driver.target}</h2>
+                    <p class="muted">Model quality: <span class="quality">${q.r2 ?? q.accuracy} — ${q.interpretation}</span></p>`;
+                const max = driver.drivers[0].importance || 1;
+                driver.drivers.forEach(d => {
+                    const width = Math.round((d.importance / max) * 100);
+                    html += `<div class="bar-row">
+                        <div class="bar-label">${d.feature}</div>
+                        <div class="bar" style="width:${width * 2}px"></div>
+                        <div class="bar-val">${(d.importance * 100).toFixed(1)}%</div></div>`;
+                });
+                html += `</div>`;
+            }
+
+            // Anomaly summary
+            if (anomaly?.anomalies_found !== undefined) {
+                html += `<div class="card"><h2>Anomalies</h2>
+                    <p>Flagged <strong>${anomaly.anomalies_found}</strong> of ${anomaly.rows_scanned}
+                    rows (${anomaly.anomaly_rate_pct}%) using ${anomaly.method}.</p>`;
+                const pc = anomaly.per_column_outliers || {};
+                Object.keys(pc).forEach(col => {
+                    html += `<p class="muted">${col}: ${pc[col].outlier_count} outliers
+                            (normal range ${pc[col].normal_range[0]} to ${pc[col].normal_range[1]})</p>`;
+                });
+                html += `</div>`;
+            }
+
+            // Disclaimer
+            if (data.disclaimer) {
+                html += `<div class="card"><p class="disclaimer">${data.disclaimer}</p></div>`;
+            }
+
+            results.innerHTML = html;
         }
     </script>
 </body>

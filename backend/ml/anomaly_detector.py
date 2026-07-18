@@ -8,6 +8,11 @@ def detect_anomalies(df: pd.DataFrame, top_k: int = 5, contamination=0.03,
                     exclude_cols=None) -> dict:
     """Real outlier detection on numeric columns. Excludes ID-like columns
     (Row ID, Postal Code) that are numeric but not quantities."""
+    if len(df) < 20:
+        return {"method": "IsolationForest + IQR", "status": "too_few_rows",
+                "rows_scanned": int(len(df)), "anomalies_found": 0,
+                "anomaly_rate_pct": 0.0, "per_column_outliers": {}, "most_anomalous_rows": []}
+    
     numeric = df.select_dtypes(include=[np.number]).dropna(axis=1, how="all").copy()
 
     # Drop identifier columns — numeric but meaningless for outlier detection
