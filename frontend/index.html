@@ -1,144 +1,349 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Analytics AI</title>
-    <style>
-        body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto;
-            padding: 0 20px; color: #1a1a2e; background: #f7f7fb; }
-        h1 { color: #16213e; }
-        .controls { background: #fff; padding: 20px; border-radius: 10px;
-                    box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 24px; }
-        button { background: #0f3460; color: #fff; border: none; padding: 10px 20px;
-                border-radius: 6px; cursor: pointer; font-size: 15px; }
-        button:hover { background: #16498a; }
-        .card { background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 18px;
-                box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-        .card h2 { margin-top: 0; font-size: 16px; text-transform: uppercase;
-                letter-spacing: 0.5px; color: #0f3460; }
-        .headline { font-size: 18px; font-weight: 600; line-height: 1.4; }
-        .action { border-left: 3px solid #0f3460; padding-left: 12px; margin: 12px 0; }
-        .action .why { color: #555; font-size: 14px; }
-        .bar-row { display: flex; align-items: center; margin: 6px 0; }
-        .bar-label { width: 130px; font-size: 14px; }
-        .bar { height: 18px; background: #0f3460; border-radius: 3px; }
-        .bar-val { margin-left: 8px; font-size: 13px; color: #555; }
-        .muted { color: #777; font-size: 13px; }
-        .disclaimer { font-size: 13px; color: #a33; font-style: italic; }
-        .quality { display: inline-block; padding: 2px 8px; border-radius: 4px;
-                font-size: 13px; background: #e8eef7; color: #0f3460; }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DataBrief // AI data analyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+    :root{
+    --bg:#0B0D10; --panel:#12151A; --panel-2:#0F1216; --line:#1F242C; --line-2:#2A313B;
+    --text:#E7ECF2; --muted:#7C8794; --dim:#4A525C;
+    --accent:#C6F24E; --accent-ink:#0B0D10; --warn:#FFB020; --bad:#FF5C5C; --good:#8AE9A1;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:'Inter',system-ui,sans-serif; --display:'Fraunces',Georgia,serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+    a{color:inherit}
+    ::selection{background:var(--accent);color:var(--accent-ink)}
+    body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+    linear-gradient(var(--line) 1px,transparent 1px) 0 0/100% 56px,
+    linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/56px 100%;
+    opacity:.25;
+    mask-image:radial-gradient(ellipse at 50% 0%,#000 40%,transparent 80%);
+    }
+    .app{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:28px 32px 64px}
+    .bar{display:flex;align-items:center;gap:16px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+    .brand{font-family:var(--mono);font-weight:700;letter-spacing:.12em;font-size:12px;display:flex;align-items:center;gap:10px}
+    .brand .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+    .brand .sub{color:var(--muted);font-weight:400;letter-spacing:.18em}
+    .bar .spacer{flex:1}
+    .meta{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em}
+    .meta b{color:var(--text);font-weight:500}
+    .hero{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;padding:28px 0 20px;border-bottom:1px solid var(--line)}
+    .hero h1{font-family:var(--display);font-weight:700;font-size:44px;line-height:1.05;margin:0 0 8px;letter-spacing:-.02em}
+    .hero h1 em{font-style:italic;color:var(--accent);font-weight:600}
+    .hero p{color:var(--muted);max-width:52ch;margin:0}
+    .status{border:1px solid var(--line);background:var(--panel);padding:14px 16px;font-family:var(--mono);font-size:12px;display:flex;flex-direction:column;gap:6px;justify-content:center}
+    .status .row{display:flex;justify-content:space-between;gap:12px}
+    .status .k{color:var(--muted)} .status .v{color:var(--text)}
+    .status .v.ok{color:var(--accent)} .status .v.off{color:var(--bad)}
+    .controls{display:grid;grid-template-columns:1fr 220px 200px 150px;gap:0;margin:20px 0 0;border:1px solid var(--line);background:var(--panel)}
+    .drop{padding:22px 20px;border-right:1px solid var(--line);display:flex;align-items:center;gap:16px;cursor:pointer;transition:background .15s}
+    .drop:hover,.drop.hover{background:#161A20}
+    .drop .icon{width:44px;height:44px;border:1px dashed var(--line-2);display:grid;place-items:center;font-family:var(--mono);color:var(--accent);font-size:18px}
+    .drop .title{font-weight:600;font-size:15px}
+    .drop .hint{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-top:2px}
+    .drop input{display:none}
+    .select{padding:14px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:4px}
+    .select label{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+    .select select{appearance:none;background:transparent;border:0;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 0;outline:none;cursor:pointer}
+    .select select option{background:var(--panel);color:var(--text)}
+    .run{background:var(--accent);color:var(--accent-ink);border:0;cursor:pointer;font-family:var(--mono);font-weight:700;letter-spacing:.12em;font-size:12px;display:flex;align-items:center;justify-content:center;gap:8px;transition:filter .15s}
+    .run:hover{filter:brightness(1.08)}
+    .run:disabled{background:#2A313B;color:var(--muted);cursor:not-allowed}
+    .results{margin-top:28px;display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .card{grid-column:span 4;background:var(--panel);border:1px solid var(--line);padding:18px 18px 16px;display:flex;flex-direction:column;gap:8px;position:relative}
+    .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--line-2)}
+    .card.kpi::before{background:var(--accent)}
+    .card .label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+    .card .value{font-family:var(--display);font-weight:700;font-size:40px;letter-spacing:-.02em;line-height:1}
+    .card .delta{font-family:var(--mono);font-size:11px;color:var(--muted)}
+    .card.wide{grid-column:span 8} .card.full{grid-column:span 12}
+    .card h3{margin:0;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:8px}
+    .card h3::before{content:"";width:6px;height:6px;background:var(--accent);display:inline-block}
+    .quality{font-family:var(--mono);font-size:11px;color:var(--accent)}
+    .chart{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+    .bar-row{display:grid;grid-template-columns:180px 1fr 80px;align-items:center;gap:12px;font-family:var(--mono);font-size:12px}
+    .bar-row .name{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bar-row .track{height:14px;background:#0F1216;border:1px solid var(--line);position:relative;overflow:hidden}
+    .bar-row .fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);box-shadow:inset -1px 0 0 rgba(0,0,0,.2);transform-origin:left;animation:grow .8s cubic-bezier(.2,.7,.2,1) both}
+    .bar-row .num{color:var(--muted);text-align:right}
+    @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+    .anoms{display:flex;flex-direction:column;margin-top:8px;border-top:1px solid var(--line)}
+    .anom{display:grid;grid-template-columns:80px 1fr auto;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
+    .anom .sev{font-family:var(--mono);font-size:10px;letter-spacing:.14em;padding:3px 6px;border:1px solid var(--line-2);color:var(--warn);text-align:center;text-transform:uppercase}
+    .anom.high .sev{color:var(--bad);border-color:var(--bad)}
+    .anom.low .sev{color:var(--good);border-color:var(--good)}
+    .anom .msg{font-size:14px} .anom .msg small{display:block;color:var(--muted);font-family:var(--mono);font-size:11px;margin-top:2px}
+    .anom .val{font-family:var(--mono);font-size:13px;color:var(--text)}
+    .actions{display:flex;flex-direction:column;gap:14px;margin-top:10px}
+    .act{border-left:2px solid var(--accent);padding-left:14px}
+    .act .t{font-weight:600;font-size:15px}
+    .act .w{color:var(--muted);font-family:var(--mono);font-size:11px;margin-top:4px;line-height:1.5}
+    .brief{position:relative}
+    .brief .copy{position:absolute;top:16px;right:16px;background:transparent;border:1px solid var(--line-2);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:6px 10px;cursor:pointer}
+    .brief .copy:hover{color:var(--accent);border-color:var(--accent)}
+    .brief .body{font-family:var(--display);font-size:18px;line-height:1.55;margin-top:12px;max-width:72ch}
+    .brief .body p{margin:0 0 10px} .brief .body strong{color:var(--accent);font-weight:600}
+    .disc{font-family:var(--mono);font-size:11px;color:var(--warn);letter-spacing:.04em}
+    .empty{padding:60px 20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;letter-spacing:.1em}
+    .loading{display:flex;flex-direction:column;gap:10px;padding:24px}
+    .loading .line{font-family:var(--mono);font-size:12px;color:var(--muted)}
+    .loading .line b{color:var(--accent);font-weight:500}
+    .loading .line .cursor{display:inline-block;width:8px;height:14px;background:var(--accent);vertical-align:-2px;animation:blink 1s steps(2) infinite}
+    @keyframes blink{50%{opacity:0}}
+    .err{border:1px solid var(--bad);background:#1a0e0e;padding:14px;font-family:var(--mono);font-size:12px;color:#ffb4b4;white-space:pre-wrap}
+    .foot{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.08em}
+    @media (max-width:900px){
+    .hero{grid-template-columns:1fr} .controls{grid-template-columns:1fr}
+    .drop,.select{border-right:0;border-bottom:1px solid var(--line)}
+    .card,.card.wide,.card.full{grid-column:span 12}
+    .bar-row{grid-template-columns:120px 1fr 60px}
+    }
+</style>
 </head>
 <body>
-    <h1>Analytics AI Platform</h1>
-
-    <div class="controls">
-        <input type="file" id="fileInput">
-        <button type="button" onclick="uploadAndAnalyze()">Analyze</button>
-        <p id="status" class="muted"></p>
+<div class="app">
+    <div class="bar">
+    <div class="brand"><span class="dot"></span> DataBrief <span class="sub">// AI DATA ANALYST</span></div>
+    <div class="spacer"></div>
+    <div class="meta">STATUS <b id="statusText">IDLE</b> · MODEL <b id="modelText">iforest·xgboost</b> · <b id="ts"></b></div>
     </div>
+    <div class="hero">
+    <div>
+    <h1>Turn a messy sheet into<br><em>an executive brief.</em></h1>
+    <p>Drop a CSV, Excel, or JSON file. DataBrief computes anomalies and ranks the drivers behind your target, then an AI writes a short brief grounded in those numbers.</p>
+    </div>
+    <div class="status">
+    <div class="row"><span class="k">endpoint</span><span class="v" id="conn">● checking</span></div>
+    <div class="row"><span class="k">last run</span><span class="v" id="lastRun">—</span></div>
+    <div class="row"><span class="k">rows analyzed</span><span class="v" id="rowsCount">—</span></div>
+    <div class="row"><span class="k">latency</span><span class="v" id="latency">—</span></div>
+    </div>
+    </div>
+    <div class="controls">
+    <label class="drop" id="drop" for="file">
+    <div class="icon">+</div>
+    <div>
+    <div class="title" id="fileName">Drop file or click to upload</div>
+    <div class="hint">CSV · XLSX · JSON — max 50 MB</div>
+    </div>
+    <input id="file" type="file" accept=".csv,.xlsx,.xls,.json" />
+    </label>
+    <div class="select">
+    <label>analysis</label>
+    <select id="mode">
+    <option value="full">Full: anomalies + drivers + brief</option>
+    <option value="anomalies">Anomalies only</option>
+    <option value="drivers">Driver analysis only</option>
+    </select>
+    </div>
+    <div class="select">
+    <label>predict column</label>
+    <select id="target">
+    <option value="">Auto-detect</option>
+    </select>
+    </div>
+    <button class="run" id="run" disabled>RUN <span>&rarr;</span></button>
+    </div>
+    <div id="results" class="results">
+    <div class="card full"><div class="empty">// awaiting input — upload a file and press RUN</div></div>
+    </div>
+</div>
+<script>
+    const API = "https://databrief-w2ru.onrender.com";
+    const MODE_MAP = {
+    full: ["anomalies","drivers","summary"],
+    anomalies: ["anomalies"],
+    drivers: ["drivers","summary"]
+    };
 
-    <div id="results"></div>
+    const tsEl = document.getElementById('ts');
+    function tick(){ tsEl.textContent = new Date().toISOString().replace('T',' ').slice(0,19)+'Z'; }
+    tick(); setInterval(tick,1000);
 
-    <script>
-        const API = "http://localhost:8000/api";
+    // health check on load — honest connection status
+    fetch(API+"/health").then(r=>r.json()).then(()=>{
+    document.getElementById('conn').textContent="● connected";
+    document.getElementById('conn').className="v ok";
+    }).catch(()=>{
+    document.getElementById('conn').textContent="● offline";
+    document.getElementById('conn').className="v off";
+    });
 
-        async function uploadAndAnalyze() {
-            const fileInput = document.getElementById("fileInput");
-            const status = document.getElementById("status");
-            const results = document.getElementById("results");
-            results.innerHTML = "";
+    const drop=document.getElementById('drop'), file=document.getElementById('file'),
+        fileName=document.getElementById('fileName'), runBtn=document.getElementById('run');
+    let payload=null;
+    ['dragover','dragenter'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('hover')}));
+    ['dragleave','drop'].forEach(e=>drop.addEventListener(e,()=>drop.classList.remove('hover')));
+    drop.addEventListener('drop',ev=>{ev.preventDefault(); if(ev.dataTransfer.files[0]){file.files=ev.dataTransfer.files; onFile();}});
+    file.addEventListener('change',onFile);
+    let uploadedName=null;   // filename known after upload
+    let uploading=false;     // guard: RUN must wait for upload to finish
 
-            if (!fileInput.files.length) {
-                status.textContent = "Please choose a file first.";
-                return;
-            }
+    async function onFile(){
+    const f=file.files[0]; if(!f) return; payload=f;
+    fileName.textContent=f.name+' · '+(f.size/1024).toFixed(1)+' KB';
+    runBtn.disabled=true; uploadedName=null; resetTarget();
+    uploading=true; setStatus('UPLOADING');
+    try{
+        const fd=new FormData(); fd.append('file', f);
+        const up=await fetch(API+"/api/upload",{method:"POST",body:fd});
+        if(!up.ok) throw new Error("Upload failed ("+up.status+"): "+await up.text());
+        const upData=await up.json();
+        uploadedName=upData.summary.filename;
+        populateTarget(upData.summary.column_names||[]);
+        setStatus('READY'); runBtn.disabled=false;
+    }catch(err){ renderError(err); setStatus('ERROR'); }
+    finally{ uploading=false; }
+    }
 
-            status.textContent = "Uploading...";
-            const formData = new FormData();
-            formData.append("file", fileInput.files[0]);
+    function resetTarget(){
+    const t=document.getElementById('target');
+    t.innerHTML='<option value="">Auto-detect</option>';
+    }
+    function populateTarget(cols){
+    const t=document.getElementById('target');
+    t.innerHTML='<option value="">Auto-detect</option>'+
+        cols.map(c=>`<option value="${c}">${c}</option>`).join('');
+    }
 
-            const uploadRes = await fetch(`${API}/upload`, { method: "POST", body: formData });
-            const uploadData = await uploadRes.json();
-            if (!uploadRes.ok) {
-                status.textContent = "Upload failed: " + JSON.stringify(uploadData);
-                return;
-            }
+    runBtn.addEventListener('click', run);
+    async function run(){
+    if(uploading){ return; }                     // guard: upload still in flight
+    if(!uploadedName){ setStatus('NO FILE'); return; }
+    setStatus('ANALYZING'); document.title='● Analyzing… | DataBrief'; renderLoading();
+    try{
+        const mode=document.getElementById('mode').value;
+        const target=document.getElementById('target').value;   // "" = auto
+        const data=await analyze(uploadedName, mode, target);
+        document.getElementById('latency').textContent=(data.execution_time_seconds||'?')+' s';
+        document.getElementById('lastRun').textContent=new Date().toLocaleTimeString();
+        document.getElementById('rowsCount').textContent=(data.data_summary?.rows||0).toLocaleString();
+        renderResults(data); setStatus('DONE');
+    }catch(err){ renderError(err); setStatus('ERROR'); }
+    finally{ document.title='DataBrief // AI data analyst'; }
+    }
+    function setStatus(s){ document.getElementById('statusText').textContent=s; const fr=document.getElementById('footRight'); if(fr) fr.textContent=s; }
 
-            const filename = uploadData.summary.filename;
-            status.textContent = "Analyzing " + filename + "... (this takes ~15-25s)";
+    // analysis-only call (upload already happened on file-select)
+    async function analyze(filename, mode, target){
+    const analyses=MODE_MAP[mode]||MODE_MAP.full;
+    const body={filename:filename, analyses:analyses};
+    if(target) body.target_column=target;
+    const an=await fetch(API+"/api/full-analysis",{method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(body)});
+    if(!an.ok) throw new Error("Analysis failed ("+an.status+"): "+await an.text());
+    return an.json();
+    }
 
-            const analyzeRes = await fetch(`${API}/full-analysis`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ filename: filename })
-            });
-            const data = await analyzeRes.json();
+    function renderLoading(){
+    document.getElementById('results').innerHTML=`<div class="card full"><div class="loading">
+        <div class="line">$ upload ${payload?.name||'input'}<b> ok</b></div>
+        <div class="line">$ profile columns<b> ok</b></div>
+        <div class="line">$ detect anomalies<b> …</b></div>
+        <div class="line">$ rank feature drivers</div>
+        <div class="line">$ draft brief <span class="cursor"></span></div>
+    </div></div>`;
+    }
+    function renderError(err){
+    document.getElementById('results').innerHTML=`<div class="card full"><h3>error</h3>
+        <div class="err">${(err&&err.stack)||String(err)}</div></div>`;
+    }
 
-            status.textContent = "Done in " + data.execution_time_seconds + "s";
-            renderResults(data);
-        }
+    function kpiCard(label,value,sub){
+    return `<div class="card kpi"><div class="label">${label}</div>
+        <div class="value">${value}</div><div class="delta">${sub}</div></div>`;
+    }
 
-        function renderResults(data) {
-            const results = document.getElementById("results");
-            const brief = data.analysis?.executive_brief || {};
-            const driver = data.data_summary?.driver_evidence;
-            const anomaly = data.data_summary?.anomaly_evidence;
-            let html = "";
+    function renderResults(d){
+    const ds=d.data_summary||{}, brief=d.analysis?.executive_brief||{};
+    const driver=ds.driver_evidence, anomaly=ds.anomaly_evidence;
+    const detected=d.analysis?.detailed_findings?.anomalies?.anomalies_detected;
 
-            // Headline + bottom line
-            if (brief.headline) {
-                html += `<div class="card"><h2>Executive Brief</h2>
-                    <p class="headline">${brief.headline}</p>
-                    <p>${brief.bottom_line || ""}</p></div>`;
-            }
+    // KPI row — REAL computed values, no fabricated revenue
+    const anomRate=(anomaly&&anomaly.anomalies_found!==undefined)
+        ? anomaly.anomaly_rate_pct+"%" : "—";
+    const anomSub=(anomaly&&anomaly.anomalies_found!==undefined)
+        ? anomaly.anomalies_found+" of "+anomaly.rows_scanned+" rows" : "not run";
+    const q=driver&&driver.model_quality;
+    const modelVal=q?(q.r2??q.accuracy):"—";
+    const modelSub=q?(q.interpretation+" · predicting "+driver.target):"drivers not run";
 
-            // Top actions
-            if (brief.top_actions?.length) {
-                html += `<div class="card"><h2>Recommended Actions</h2>`;
-                brief.top_actions.forEach(a => {
-                    html += `<div class="action"><strong>${a.action}</strong>
-                            <div class="why">${a.why_now || ""}</div></div>`;
-                });
-                html += `</div>`;
-            }
+    let html="";
+    html+=kpiCard("Rows", (ds.rows||0).toLocaleString(), (ds.columns||0)+" columns");
+    html+=kpiCard("Anomaly rate", anomRate, anomSub);
+    html+=kpiCard("Model R\u00b2", modelVal, modelSub);
 
-            // Driver importances as bars
-            if (driver?.drivers?.length) {
-                const q = driver.model_quality || {};
-                html += `<div class="card"><h2>What Drives ${driver.target}</h2>
-                    <p class="muted">Model quality: <span class="quality">${q.r2 ?? q.accuracy} — ${q.interpretation}</span></p>`;
-                const max = driver.drivers[0].importance || 1;
-                driver.drivers.forEach(d => {
-                    const width = Math.round((d.importance / max) * 100);
-                    html += `<div class="bar-row">
-                        <div class="bar-label">${d.feature}</div>
-                        <div class="bar" style="width:${width * 2}px"></div>
-                        <div class="bar-val">${(d.importance * 100).toFixed(1)}%</div></div>`;
-                });
-                html += `</div>`;
-            }
+    // Feature drivers (positive importances, scaled to top driver)
+    if(driver&&driver.drivers&&driver.drivers.length){
+        const max=driver.drivers[0].importance||1;
+        const bars=driver.drivers.map(x=>{
+        const w=Math.max(4,(x.importance/max)*100);
+        return `<div class="bar-row"><div class="name">${x.feature}</div>
+            <div class="track"><div class="fill" style="width:${w}%"></div></div>
+            <div class="num">${(x.importance*100).toFixed(1)}%</div></div>`;
+        }).join("");
+        html+=`<div class="card wide"><h3>feature drivers · impact on ${driver.target}</h3>
+        <span class="quality">model quality ${modelVal} — ${q?q.interpretation:''} · ${driver.compute_device}</span>
+        <div class="chart">${bars}</div></div>`;
+    }
 
-            // Anomaly summary
-            if (anomaly?.anomalies_found !== undefined) {
-                html += `<div class="card"><h2>Anomalies</h2>
-                    <p>Flagged <strong>${anomaly.anomalies_found}</strong> of ${anomaly.rows_scanned}
-                    rows (${anomaly.anomaly_rate_pct}%) using ${anomaly.method}.</p>`;
-                const pc = anomaly.per_column_outliers || {};
-                Object.keys(pc).forEach(col => {
-                    html += `<p class="muted">${col}: ${pc[col].outlier_count} outliers
-                            (normal range ${pc[col].normal_range[0]} to ${pc[col].normal_range[1]})</p>`;
-                });
-                html += `</div>`;
-            }
+    // Anomalies — prefer the agent's severity-tagged findings, else computed per-column
+    let anomInner="";
+    if(detected&&detected.length){
+        anomInner=detected.map(a=>{
+        const sev=(a.severity||"med").toLowerCase();
+        return `<div class="anom ${sev}"><div class="sev">${sev}</div>
+            <div class="msg">${a.description||a.column}<small>${a.column} · ${a.type||''}</small></div>
+            <div class="val">${a.type||''}</div></div>`;
+        }).join("");
+    } else if(anomaly&&anomaly.per_column_outliers){
+        anomInner=Object.keys(anomaly.per_column_outliers).map(col=>{
+        const o=anomaly.per_column_outliers[col];
+        return `<div class="anom med"><div class="sev">med</div>
+            <div class="msg">${col} outliers<small>normal ${o.normal_range[0]} to ${o.normal_range[1]}</small></div>
+            <div class="val">${o.outlier_count}</div></div>`;
+        }).join("");
+    }
+    if(anomInner){
+        const n=(detected&&detected.length)||Object.keys(anomaly?.per_column_outliers||{}).length;
+        html+=`<div class="card"><h3>anomalies · ${n} flagged</h3><div class="anoms">${anomInner}</div></div>`;
+    }
 
-            // Disclaimer
-            if (data.disclaimer) {
-                html += `<div class="card"><p class="disclaimer">${data.disclaimer}</p></div>`;
-            }
+    // Executive brief (built from your structured object, not an HTML blob)
+    if(brief.headline){
+        let body=`<p><strong>${brief.headline}</strong></p>`;
+        if(brief.bottom_line) body+=`<p>${brief.bottom_line}</p>`;
+        html+=`<div class="card full brief"><h3>executive brief</h3>
+        <button class="copy" id="copyBrief">COPY</button>
+        <div class="body">${body}</div></div>`;
+    }
 
-            results.innerHTML = html;
-        }
-    </script>
+    // Recommended actions (your real top_actions)
+    if(brief.top_actions&&brief.top_actions.length){
+        const acts=brief.top_actions.map(a=>`<div class="act">
+        <div class="t">${a.action}</div><div class="w">${a.why_now||''}</div></div>`).join("");
+        html+=`<div class="card full"><h3>recommended actions</h3><div class="actions">${acts}</div></div>`;
+    }
+
+    // Disclaimer
+    if(d.disclaimer){ html+=`<div class="card full"><div class="disc">${d.disclaimer}</div></div>`; }
+
+    document.getElementById('results').innerHTML=html;
+    const cb=document.getElementById('copyBrief');
+    if(cb) cb.addEventListener('click',()=>{
+        navigator.clipboard.writeText(document.querySelector('.brief .body').innerText);
+        cb.textContent='COPIED'; setTimeout(()=>cb.textContent='COPY',1200);
+    });
+    }
+</script>
 </body>
 </html>
