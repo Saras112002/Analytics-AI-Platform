@@ -2,9 +2,6 @@ import warnings
 warnings.filterwarnings("ignore", message=".*mismatched devices.*")
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, accuracy_score
-from xgboost import XGBRegressor, XGBClassifier
 
 MIN_ROWS = 20
 ID_KEYWORDS = ("id", "code", "zip", "postal", "phone", "index")
@@ -49,6 +46,9 @@ def _quality_note(metric, score):
 
 
 def analyze_drivers(df: pd.DataFrame, target: str = None, top_k: int = 8) -> dict:
+    from sklearn.model_selection import train_test_split
+    from sklearn.metrics import r2_score, accuracy_score
+    from xgboost import XGBRegressor, XGBClassifier
     if len(df) < MIN_ROWS:
         return {"method": "xgboost", "status": f"too_few_rows (<{MIN_ROWS})", "target": None, "drivers": []}
 

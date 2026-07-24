@@ -1,11 +1,11 @@
 # backend/ml/anomaly_detector.py
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import IsolationForest
 
 
 def detect_anomalies(df: pd.DataFrame, top_k: int = 5, contamination=0.03,
                     exclude_cols=None) -> dict:
+    from sklearn.ensemble import IsolationForest    
     """Real outlier detection on numeric columns. Excludes ID-like columns
     (Row ID, Postal Code) that are numeric but not quantities."""
     if len(df) < 20:
