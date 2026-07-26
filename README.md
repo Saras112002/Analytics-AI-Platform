@@ -67,9 +67,9 @@ The ML evidence is injected into each agent's prompt as ground truth. Agents exp
 
 ---
 
-## Running locally
+## Running it
 
-You need two terminals: one for the API, one to serve the page.
+DataBrief runs locally. You need two terminals: one for the API, one to serve the page.
 
 **1. Backend** (from the project root):
 ```bash
@@ -82,7 +82,7 @@ Set your `OPENROUTER_API_KEY` in a `.env` file first.
 ```bash
 python -m http.server 5500
 ```
-Then open **http://localhost:5500/signal.html**, choose a file, pick a target column (or leave it on auto), and press RUN.
+Then open **http://localhost:5500**, choose a file, pick a target column (or leave it on auto), and press RUN.
 
 ---
 
@@ -100,6 +100,8 @@ Then open **http://localhost:5500/signal.html**, choose a file, pick a target co
 This is a portfolio project, not a production system:
 
 - It runs on a **free LLM tier**, which occasionally fabricates a figure inside the prose narrative. This is why every brief carries a verification disclaimer — the computed evidence (anomalies, driver importances, model quality) is reliable; the AI's surrounding prose should be checked.
+- **Analysis latency depends on the free LLM tier.** Response times vary with traffic on the free model pool; a run may take anywhere from ~30s to a couple of minutes. On a paid model with priority routing this drops to roughly 20 seconds. The bottleneck is the hosted model's throughput, not the computation.
+- **Runs locally rather than hosted.** The backend loads pandas, scikit-learn and XGBoost into a single process, which exceeds the memory budget of free hosting tiers. Rather than strip out the ML to fit a free container, I kept the analysis intact and made the project straightforward to run locally — the setup above takes about two minutes.
 - **Single-user, no authentication.**
 - Analysis quality depends on the uploaded data having meaningful numeric columns.
 
@@ -107,8 +109,16 @@ These are known and deliberate scope choices, not oversights.
 
 ---
 
+## Screenshots
+
+![DataBrief analysing a retail dataset](screenshots/databrief-overview.png)
+*Computed KPIs, XGBoost feature drivers, and severity-tagged anomalies.*
+
+![Executive brief](screenshots/databrief-brief.png)
+*The LLM layer explaining the computed evidence, with its verification disclaimer.*
+
+---
+
 ## Author
 
-Built by **[Your Name]** — [GitHub](https://github.com/Saras112002/Analytics-AI-Platform) · [LinkedIn](#)
-
-_Add a screenshot of the DataBrief UI here — it's the fastest way to show it works._
+Built by **Saras Chawla** — [GitHub](https://github.com/Saras112002/Analytics-AI-Platform) · [LinkedIn](https://www.linkedin.com/in/saras-chawla02/)

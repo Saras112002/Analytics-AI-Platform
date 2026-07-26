@@ -43,22 +43,20 @@ class Orchestrator:
 
     def _run_specialists(self, data_summary: dict) -> dict:
         """
-        Runs specialist agents one at a time.
-        Sequential rather than parallel: the free-tier deployment has a
-        512MB memory ceiling, and three concurrent LLM connections push
-        past it. One agent failing does not stop the others.
+        Runs specialist agents in parallel (local run — no memory limit).
+        One agent failing does not stop the others.
         """
+        from concurrent.futures import ThreadPoolExecutor
         results = {}
-
-        for name, agent in self.specialist_agents.items():
-            try:
-                results[name] = agent.analyze(data_summary)
-            except Exception as e:
-                results[name] = {
-                    "error": str(e),
-                    "agent_name": name
-                }
-
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = {executor.submit(agent.analyze, data_summary): name
+                for name, agent in self.specialist_agents.items()}
+            for future in futures:
+                name = futures[future]
+                try:
+                    results[name] = future.result()
+                except Exception as e:
+                    results[name] = {"error": str(e), "agent_name": name}
         return results
 
 # Create one shared instance the whole app can use

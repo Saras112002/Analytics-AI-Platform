@@ -15,7 +15,7 @@ class LLMClient:
             base_url="https://openrouter.ai/api/v1",
             api_key=settings.OPENROUTER_API_KEY
         )
-        self.model = "poolside/laguna-xs-2.1:free"
+        self.model = "openai/gpt-oss-20b:free"
         self.max_tokens = 2000
 
     def ask(self, prompt: str, system_prompt: str = None) -> str:
@@ -26,6 +26,7 @@ class LLMClient:
 
             for attempt in range(2):   # try twice before giving up
                 try:
+                    print(f"[LLM CALL] model={self.model}")
                     response = self.client.chat.completions.create(
                         model=self.model, messages=messages, max_tokens=self.max_tokens,
                     )
