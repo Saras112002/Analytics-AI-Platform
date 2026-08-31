@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pathlib import Path
 from backend.config import get_settings
 from backend.api.upload import router as upload_router
 from backend.api.full_analysis import router as full_analysis_router
@@ -21,13 +23,10 @@ app.add_middleware(
 # Connect routers
 app.include_router(upload_router, prefix="/api")
 app.include_router(full_analysis_router, prefix="/api")
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def root():
-    return {
-        "app": settings.APP_NAME,
-        "version": settings.APP_VERSION,
-        "status": "running"
-    }
+    frontend = Path(__file__).resolve().parent.parent / "frontend" / "index.html"
+    return FileResponse(frontend)
 
 @app.get("/health")
 def health_check():
@@ -35,4 +34,3 @@ def health_check():
         "status": "healthy",
         "gpu_available": True
     }
-

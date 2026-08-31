@@ -1,9 +1,11 @@
 import pandas as pd
-import os
+from io import BytesIO
 from pathlib import Path
 
 ALLOWED_EXTENSIONS = {".csv", ".xlsx", ".xls", ".json"}
-MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
+# Vercel Functions have a 4.5 MB request-body limit. Keep enough room for the
+# multipart envelope so oversized files receive a useful client/API error.
+MAX_FILE_SIZE = 4 * 1024 * 1024
 
 
 def validate_file(filename: str, file_size: int) -> dict:
@@ -18,7 +20,7 @@ def validate_file(filename: str, file_size: int) -> dict:
     if file_size > MAX_FILE_SIZE:
         return {
             "valid": False,
-            "error": "File too large. Maximum size is 50MB"
+            "error": "File too large. Maximum size is 4 MB"
         }
 
     return {"valid": True, "error": None}
@@ -27,12 +29,20 @@ def validate_file(filename: str, file_size: int) -> dict:
 def read_file(filepath: str) -> pd.DataFrame:
     extension = Path(filepath).suffix.lower()
 
+    with open(filepath, "rb") as source:
+        return read_file_bytes(Path(filepath).name, source.read())
+
+
+def read_file_bytes(filename: str, content: bytes) -> pd.DataFrame:
+    """Read an uploaded table without relying on persistent server storage."""
+    extension = Path(filename).suffix.lower()
+
     if extension == ".csv":
         encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
         df = None
         for encoding in encodings:
             try:
-                df = pd.read_csv(filepath, encoding=encoding)
+                df = pd.read_csv(BytesIO(content), encoding=encoding)
                 break
             except UnicodeDecodeError:
                 continue
@@ -40,10 +50,10 @@ def read_file(filepath: str) -> pd.DataFrame:
             raise ValueError("Could not read CSV with any known encoding")
 
     elif extension in [".xlsx", ".xls"]:
-        df = pd.read_excel(filepath)
+        df = pd.read_excel(BytesIO(content))
 
     elif extension == ".json":
-        df = pd.read_json(filepath)
+        df = pd.read_json(BytesIO(content))
         if not isinstance(df, pd.DataFrame) or df.empty:
             raise ValueError("JSON could not be read as a table")
 

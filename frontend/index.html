@@ -132,7 +132,7 @@
     <div class="icon">+</div>
     <div>
     <div class="title" id="fileName">Drop file or click to upload</div>
-    <div class="hint">CSV · XLSX · JSON — max 50 MB</div>
+    <div class="hint">CSV · XLSX · JSON — max 4 MB</div>
     </div>
     <input id="file" type="file" accept=".csv,.xlsx,.xls,.json" />
     </label>
@@ -157,7 +157,10 @@
     </div>
 </div>
 <script>
-    const API = "http://localhost:8000";
+    // Use the API hosted on the same origin in production. This also works
+    // locally when the page is served by FastAPI.
+    const API = window.location.origin;
+    const MAX_FILE_SIZE = 4 * 1024 * 1024;
     const MODE_MAP = {
     full: ["anomalies","drivers","summary"],
     anomalies: ["anomalies"],
@@ -191,6 +194,10 @@
     const f=file.files[0]; if(!f) return; payload=f;
     fileName.textContent=f.name+' · '+(f.size/1024).toFixed(1)+' KB';
     runBtn.disabled=true; uploadedName=null; resetTarget();
+    if(f.size > MAX_FILE_SIZE){
+        renderError(new Error('File too large for Vercel. Maximum size is 4 MB.'));
+        setStatus('ERROR'); return;
+    }
     uploading=true; setStatus('UPLOADING');
     try{
         const fd=new FormData(); fd.append('file', f);
@@ -222,7 +229,7 @@
     try{
         const mode=document.getElementById('mode').value;
         const target=document.getElementById('target').value;   // "" = auto
-        const data=await analyze(uploadedName, mode, target);
+        const data=await analyze(payload, mode, target);
         document.getElementById('latency').textContent=(data.execution_time_seconds||'?')+' s';
         document.getElementById('lastRun').textContent=new Date().toLocaleTimeString();
         document.getElementById('rowsCount').textContent=(data.data_summary?.rows||0).toLocaleString();
@@ -233,13 +240,13 @@
     function setStatus(s){ document.getElementById('statusText').textContent=s; const fr=document.getElementById('footRight'); if(fr) fr.textContent=s; }
 
     // analysis-only call (upload already happened on file-select)
-    async function analyze(filename, mode, target){
+    async function analyze(fileToAnalyze, mode, target){
     const analyses=MODE_MAP[mode]||MODE_MAP.full;
-    const body={filename:filename, analyses:analyses};
-    if(target) body.target_column=target;
-    const an=await fetch(API+"/api/full-analysis",{method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify(body)});
+    const body=new FormData();
+    body.append('file', fileToAnalyze);
+    body.append('analyses', JSON.stringify(analyses));
+    if(target) body.append('target_column', target);
+    const an=await fetch(API+"/api/full-analysis-file",{method:"POST",body});
     if(!an.ok) throw new Error("Analysis failed ("+an.status+"): "+await an.text());
     return an.json();
     }

@@ -69,20 +69,28 @@ The ML evidence is injected into each agent's prompt as ground truth. Agents exp
 
 ## Running it
 
-DataBrief runs locally. You need two terminals: one for the API, one to serve the page.
+DataBrief runs locally from one FastAPI process.
 
-**1. Backend** (from the project root):
+From the project root:
 ```bash
 pip install -r requirements.txt
 uvicorn backend.main:app --reload
 ```
 Set your `OPENROUTER_API_KEY` in a `.env` file first.
 
-**2. Frontend** (from the `frontend/` folder):
-```bash
-python -m http.server 5500
-```
-Then open **http://localhost:5500**, choose a file, pick a target column (or leave it on auto), and press RUN.
+Then open **http://localhost:8000**, choose a file, pick a target column (or leave it on auto), and press RUN.
+
+### Deploying to Vercel
+
+Deploy the repository root (the directory containing `app.py` and
+`requirements.txt`) and add `OPENROUTER_API_KEY` in **Project Settings →
+Environment Variables**. The frontend and FastAPI backend are served from the
+same Vercel deployment, so no separate API URL is required.
+
+Uploads are limited to 4 MB because Vercel Functions enforce a 4.5 MB request
+and response payload limit. Analysis is performed from the multipart upload in
+a single invocation; uploaded workbooks are not stored on the function's local
+filesystem.
 
 ---
 
@@ -101,7 +109,7 @@ This is a portfolio project, not a production system:
 
 - It runs on a **free LLM tier**, which occasionally fabricates a figure inside the prose narrative. This is why every brief carries a verification disclaimer — the computed evidence (anomalies, driver importances, model quality) is reliable; the AI's surrounding prose should be checked.
 - **Analysis latency depends on the free LLM tier.** Response times vary with traffic on the free model pool; a run may take anywhere from ~30s to a couple of minutes. On a paid model with priority routing this drops to roughly 20 seconds. The bottleneck is the hosted model's throughput, not the computation.
-- **Runs locally rather than hosted.** The backend loads pandas, scikit-learn and XGBoost into a single process, which exceeds the memory budget of free hosting tiers. Rather than strip out the ML to fit a free container, I kept the analysis intact and made the project straightforward to run locally — the setup above takes about two minutes.
+- **Hosted uploads are capped at 4 MB.** This keeps multipart requests below Vercel's function payload limit. Larger datasets should be uploaded directly to durable object storage and passed to the analysis function by reference.
 - **Single-user, no authentication.**
 - Analysis quality depends on the uploaded data having meaningful numeric columns.
 

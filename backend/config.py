@@ -10,7 +10,7 @@ class Settings(BaseSettings):
 
     # AI APIs
     ANTHROPIC_API_KEY: str = ""
-    OPENROUTER_API_KEY: str
+    OPENROUTER_API_KEY: str = ""
     GOOGLE_API_KEY: str = ""
 
     # File paths
