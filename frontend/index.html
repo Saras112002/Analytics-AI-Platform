@@ -50,9 +50,12 @@ mask-image:radial-gradient(ellipse at 50% 0%,#000 40%,transparent 80%);
 .drop .title{font-weight:600;font-size:15px}
 .drop .hint{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-top:2px}
 .drop input{display:none}
-.select{padding:14px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:4px}
+.select{padding:14px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:4px;position:relative;cursor:pointer;transition:background .15s}
+.select:hover{background:#161A20}
+.select::after{content:"";position:absolute;right:16px;bottom:20px;width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);pointer-events:none;transition:border-color .2s}
+.select:hover::after{border-color:var(--accent)}
 .select label{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
-.select select{appearance:none;background:transparent;border:0;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 0;outline:none;cursor:pointer}
+.select select{appearance:none;-webkit-appearance:none;-moz-appearance:none;background:transparent;border:0;color:var(--text);font-family:var(--mono);font-size:13px;padding:4px 20px 4px 0;outline:none;cursor:pointer;width:100%}
 .select select option{background:var(--panel);color:var(--text)}
 .run{background:var(--accent);color:var(--accent-ink);border:0;cursor:pointer;font-family:var(--mono);font-weight:700;letter-spacing:.12em;font-size:12px;display:flex;align-items:center;justify-content:center;gap:8px;transition:filter .15s}
 .run:hover{filter:brightness(1.08)}
