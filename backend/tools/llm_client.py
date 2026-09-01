@@ -15,7 +15,7 @@ class LLMClient:
             base_url="https://openrouter.ai/api/v1",
             api_key=settings.OPENROUTER_API_KEY
         )
-        self.model = "liquid/lfm-2.5-2.6b:free"
+        self.model = "xiaomi/mimo-v2-flash:free"
         self.max_tokens = 2000
 
     def ask(self, prompt: str, system_prompt: str = None) -> str:
