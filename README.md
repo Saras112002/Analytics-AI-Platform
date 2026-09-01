@@ -1,96 +1,11 @@
-# DataBrief — AI Analytics Platform
-
-**Upload a messy sales/inventory spreadsheet. Get computed anomaly detection, feature-driver analysis, and an AI-written executive brief — in about 20 seconds.**
-
-DataBrief is a hybrid analytics tool built on one core idea: **the ML models do the math, the LLM explains it.** Real machine-learning models compute the hard numbers (which rows are anomalous, which columns predict a metric you choose), and a team of LLM agents translates those numbers into a business brief a manager could actually read. The AI never invents the analysis — it narrates results that were computed, not guessed.
-
-> _Portfolio project. Built to learn production-style ML + LLM system design end to end._
-
----
-
-## Why this is different
-
-Most "AI analyzes your data" tools hand the raw spreadsheet to an LLM and hope it does the math. LLMs are bad at math and confidently make numbers up. DataBrief inverts that:
-
-- **Computation is done by real models**, not the language model:
-  - **Anomaly detection** → `IsolationForest` (scikit-learn) + per-column IQR bounds.
-  - **Driver analysis** → `XGBoost` gradient boosting, GPU-accelerated when a GPU is available (CPU fallback otherwise).
-- **The LLM only explains** the computed evidence. Agent prompts are constrained to cite only numbers present in the computed output, and every brief ships with a verification disclaimer.
-
-The result: the trustworthy numbers come from deterministic ML you can defend in an interview, and the readable narrative comes from the LLM — with clear boundaries between the two.
-
----
-
-## What it does
-
-1. **Ingests** a tabular file — CSV, Excel, or JSON (non-tabular input is rejected with a clear message).
-2. **Computes anomalies** with IsolationForest at a tuned 3% contamination rate, excluding ID-like columns so identifiers aren't mistaken for outliers, with a minimum-rows guard so tiny files don't report meaningless rates.
-3. **Ranks drivers** with XGBoost. **You choose which column to predict** (e.g. Profit, Sales) from a dropdown, or let it auto-detect. It reports which features predict your target and how strongly, plus an honest model-quality score (R²) so weak models are flagged as weak.
-4. **Runs a multi-agent LLM layer** — four specialist agents (anomaly, insight, strategy, summary) coordinated by an orchestrator — that synthesizes the computed evidence into an executive brief with recommended actions.
-5. **Renders** everything in a clean terminal-style UI: KPI cards, an animated driver bar chart that re-ranks when you change the target, severity-tagged anomalies, and the brief.
-
-You also choose *which* analyses to run (anomalies, drivers, or a full pass) — the UI passes those choices to the backend so only the requested computation runs.
-
----
-
-## Architecture
-
-```
-File upload
-   │
-   ▼
-FastAPI backend
-   │
-   ├── ML layer (the computed truth)
-   │     ├── IsolationForest  → anomaly evidence
-   │     └── XGBoost          → driver evidence (user-selected target)
-   │
-   ├── Multi-agent LLM layer (the explanation)
-   │     ├── BaseAgent  →  AnomalyAgent · InsightAgent · StrategyAgent · SummaryAgent
-   │     └── Orchestrator (parallel execution → synthesized brief)
-   │
-   ▼
-JSON response  →  vanilla HTML/JS frontend (DataBrief)
-```
-
-The ML evidence is injected into each agent's prompt as ground truth. Agents explain that evidence; they do not compute it.
-
----
-
-## Tech stack
-
-- **Backend:** Python 3.12, FastAPI, Uvicorn
-- **ML:** scikit-learn (IsolationForest), XGBoost (GPU/CUDA with CPU fallback), pandas, NumPy
-- **LLM:** OpenRouter API (model-agnostic), custom multi-agent orchestration with grounded prompting
-- **Frontend:** vanilla HTML / CSS / JavaScript — no framework, no build step
-- **Reliability:** hardened JSON parsing, request retries, graceful degradation on missing/tiny data
-
----
-
-## Running it
-
-DataBrief runs locally from one FastAPI process.
-
-From the project root:
-```bash
-pip install -r requirements.txt
-uvicorn backend.main:app --reload
-```
-Set your `OPENROUTER_API_KEY` in a `.env` file first.
-
-Then open **http://localhost:8000**, choose a file, pick a target column (or leave it on auto), and press RUN.
+#
+Then open **<http://localhost:8000>**, choose a file, pick a target column (or leave it on auto), and press RUN.
 
 ### Deploying to Vercel
 
-Deploy the repository root (the directory containing `app.py` and
-`requirements.txt`) and add `OPENROUTER_API_KEY` in **Project Settings →
-Environment Variables**. The frontend and FastAPI backend are served from the
-same Vercel deployment, so no separate API URL is required.
+Deploy the repository root (the directory containing `app.py` and `requirements.txt`) and add `OPENROUTER_API_KEY` in **Project Settings → Environment Variables**. The frontend and FastAPI backend are served from the same Vercel deployment, so no separate API URL is required.
 
-Uploads are limited to 4 MB because Vercel Functions enforce a 4.5 MB request
-and response payload limit. Analysis is performed from the multipart upload in
-a single invocation; uploaded workbooks are not stored on the function's local
-filesystem.
+Uploads are limited to 4 MB because Vercel Functions enforce a 4.5 MB request and response payload limit. Analysis is performed from the multipart upload in a single invocation; uploaded workbooks are not stored on the function's local filesystem.
 
 ---
 
@@ -99,6 +14,7 @@ filesystem.
 - **Grounded generation over free generation.** Rather than trusting the LLM to be accurate, the system computes evidence first and constrains the LLM to explain only that evidence — with a disclaimer for the residual gap. This is the honest way to use LLMs on numeric data.
 - **The user picks the target.** Driver analysis is only meaningful against a chosen target, so the UI lets the analyst select which column to predict and re-runs XGBoost against it — the drivers visibly change with the choice.
 - **Honest model reporting.** XGBoost reports whether it actually ran on GPU vs. CPU, and reports its own R² so a weak model is labeled "weak signal" instead of being presented as fact.
+- **Provider-agnostic LLM wrapper.** The LLM client abstracts OpenRouter behind a clean interface. Swapping to Claude, GPT, or a self-hosted model requires changing one file.
 - **Guards against silent nonsense.** ID columns are excluded from ML, tiny files are refused, and unsupported file types return clear errors instead of crashing.
 
 ---
@@ -110,8 +26,8 @@ This is a portfolio project, not a production system:
 - It runs on a **free LLM tier**, which occasionally fabricates a figure inside the prose narrative. This is why every brief carries a verification disclaimer — the computed evidence (anomalies, driver importances, model quality) is reliable; the AI's surrounding prose should be checked.
 - **Analysis latency depends on the free LLM tier.** Response times vary with traffic on the free model pool; a run may take anywhere from ~30s to a couple of minutes. On a paid model with priority routing this drops to roughly 20 seconds. The bottleneck is the hosted model's throughput, not the computation.
 - **Hosted uploads are capped at 4 MB.** This keeps multipart requests below Vercel's function payload limit. Larger datasets should be uploaded directly to durable object storage and passed to the analysis function by reference.
-- **Single-user, no authentication.**
-- Analysis quality depends on the uploaded data having meaningful numeric columns.
+- **Single-user, no authentication.** Multi-tenancy and auth are planned but not implemented.
+- **Analysis quality depends on the uploaded data** having meaningful numeric columns and enough rows for ML to be statistically valid.
 
 These are known and deliberate scope choices, not oversights.
 
@@ -119,14 +35,35 @@ These are known and deliberate scope choices, not oversights.
 
 ## Screenshots
 
-![DataBrief analysing a retail dataset](screenshots/databrief-overview.png)
+[![DataBrief analysing a retail dataset](https://github.com/Saras112002/Analytics-AI-Platform/raw/main/screenshots/databrief-overview.png)](/Saras112002/Analytics-AI-Platform/blob/main/screenshots/databrief-overview.png)
 *Computed KPIs, XGBoost feature drivers, and severity-tagged anomalies.*
 
-![Executive brief](screenshots/databrief-brief.png)
+[![Executive brief](https://github.com/Saras112002/Analytics-AI-Platform/raw/main/screenshots/databrief-brief.png)](/Saras112002/Analytics-AI-Platform/blob/main/screenshots/databrief-brief.png)
 *The LLM layer explaining the computed evidence, with its verification disclaimer.*
+
+---
+
+## Roadmap
+
+- [x] Data ingestion with multi-encoding support
+- [x] IsolationForest anomaly detection with tuned contamination rate
+- [x] XGBoost driver analysis with user-selectable target
+- [x] Multi-agent LLM system (Anomaly, Insight, Strategy, Summary agents)
+- [x] Parallel agent orchestration
+- [x] Vanilla JS frontend with reactive updates
+- [x] Vercel deployment (full-stack unified)
+- [ ] Time-series forecasting with Prophet
+- [ ] RAG memory for cross-session context
+- [ ] User authentication and multi-tenancy
+- [ ] Larger file support via object storage
+- [ ] Custom domain
 
 ---
 
 ## Author
 
-Built by **Saras Chawla** — [GitHub](https://github.com/Saras112002/Analytics-AI-Platform) · [LinkedIn](https://www.linkedin.com/in/saras-chawla02/)
+Built by **Saras Chawla** — Data Science student at IIT Guwahati
+
+- GitHub: [@Saras112002](https://github.com/Saras112002)
+- LinkedIn: [saras-chawla02](https://www.linkedin.com/in/saras-chawla02/)
+- Live Project: [analytics-ai-platform.vercel.app](https://analytics-ai-platform.vercel.app)
