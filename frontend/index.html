@@ -1,869 +1,1225 @@
 ```html
 <!doctype html>
 <html lang="en">
+
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+
 <title>DataBrief // AI data analyst</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+
+<link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+    rel="stylesheet"
+>
 
 <style>
-:root{
-    --bg:#0B0D10;
-    --panel:#12151A;
-    --panel-2:#0F1216;
-    --line:#1F242C;
-    --line-2:#2A313B;
-    --text:#E7ECF2;
-    --muted:#7C8794;
-    --dim:#4A525C;
-    --accent:#C6F24E;
-    --accent-ink:#0B0D10;
-    --warn:#FFB020;
-    --bad:#FF5C5C;
-    --good:#8AE9A1;
 
-    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
-    --sans:'Inter',system-ui,sans-serif;
-    --display:'Fraunces',Georgia,serif;
+/* ============================================================
+   ROOT
+   ============================================================ */
+
+:root {
+    --bg: #0B0D10;
+    --panel: #12151A;
+    --panel-2: #0F1216;
+    --line: #1F242C;
+    --line-2: #2A313B;
+
+    --text: #E7ECF2;
+    --muted: #7C8794;
+    --dim: #4A525C;
+
+    --accent: #C6F24E;
+    --accent-ink: #0B0D10;
+
+    --warn: #FFB020;
+    --bad: #FF5C5C;
+    --good: #8AE9A1;
+
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'Inter', system-ui, sans-serif;
+    --display: 'Fraunces', Georgia, serif;
 }
 
-*{
-    box-sizing:border-box
+
+/* ============================================================
+   GLOBAL
+   ============================================================ */
+
+* {
+    box-sizing: border-box;
 }
 
-html,body{
-    margin:0;
-    padding:0;
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--sans);
-    font-size:14px;
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
 
-a{
-    color:inherit
+a {
+    color: inherit;
 }
 
-::selection{
-    background:var(--accent);
-    color:var(--accent-ink)
+::selection {
+    background: var(--accent);
+    color: var(--accent-ink);
 }
 
-body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    z-index:0;
+
+/* ============================================================
+   BACKGROUND GRID
+   ============================================================ */
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+
     background:
-        linear-gradient(var(--line) 1px,transparent 1px) 0 0/100% 56px,
-        linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/56px 100%;
-    opacity:.25;
-    mask-image:radial-gradient(ellipse at 50% 0%,#000 40%,transparent 80%);
+        linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 100% 56px,
+        linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 56px 100%;
+
+    opacity: .25;
+
+    mask-image:
+        radial-gradient(
+            ellipse at 50% 0%,
+            #000 40%,
+            transparent 80%
+        );
 }
 
-.app{
-    position:relative;
-    z-index:1;
-    max-width:1280px;
-    margin:0 auto;
-    padding:28px 32px 64px
+
+/* ============================================================
+   APP
+   ============================================================ */
+
+.app {
+    position: relative;
+    z-index: 1;
+
+    max-width: 1280px;
+    margin: 0 auto;
+
+    padding: 28px 32px 64px;
 }
 
-.bar{
-    display:flex;
-    align-items:center;
-    gap:16px;
-    padding-bottom:20px;
-    border-bottom:1px solid var(--line)
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+
+.bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    padding-bottom: 20px;
+
+    border-bottom: 1px solid var(--line);
 }
 
-.brand{
-    font-family:var(--mono);
-    font-weight:700;
-    letter-spacing:.12em;
-    font-size:12px;
-    display:flex;
-    align-items:center;
-    gap:10px
+.brand {
+    font-family: var(--mono);
+    font-weight: 700;
+    letter-spacing: .12em;
+    font-size: 12px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.brand .dot{
-    width:8px;
-    height:8px;
-    background:var(--accent);
-    border-radius:50%;
-    box-shadow:0 0 12px var(--accent)
+.brand .dot {
+    width: 8px;
+    height: 8px;
+
+    background: var(--accent);
+    border-radius: 50%;
+
+    box-shadow: 0 0 12px var(--accent);
 }
 
-.brand .sub{
-    color:var(--muted);
-    font-weight:400;
-    letter-spacing:.18em
+.brand .sub {
+    color: var(--muted);
+    font-weight: 400;
+    letter-spacing: .18em;
 }
 
-.bar .spacer{
-    flex:1
+.bar .spacer {
+    flex: 1;
 }
 
-.meta{
-    font-family:var(--mono);
-    font-size:11px;
-    color:var(--muted);
-    letter-spacing:.08em
+.meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .08em;
 }
 
-.meta b{
-    color:var(--text);
-    font-weight:500
+.meta b {
+    color: var(--text);
+    font-weight: 500;
 }
 
-.hero{
-    display:grid;
-    grid-template-columns:1.4fr 1fr;
-    gap:24px;
-    padding:28px 0 20px;
-    border-bottom:1px solid var(--line)
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+
+    gap: 24px;
+
+    padding: 28px 0 20px;
+
+    border-bottom: 1px solid var(--line);
 }
 
-.hero h1{
-    font-family:var(--display);
-    font-weight:700;
-    font-size:44px;
-    line-height:1.05;
-    margin:0 0 8px;
-    letter-spacing:-.02em
+.hero h1 {
+    font-family: var(--display);
+    font-weight: 700;
+
+    font-size: 44px;
+    line-height: 1.05;
+
+    margin: 0 0 8px;
+
+    letter-spacing: -.02em;
 }
 
-.hero h1 em{
-    font-style:italic;
-    color:var(--accent);
-    font-weight:600
+.hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 600;
 }
 
-.hero p{
-    color:var(--muted);
-    max-width:52ch;
-    margin:0
+.hero p {
+    color: var(--muted);
+    max-width: 52ch;
+    margin: 0;
 }
 
-.status{
-    border:1px solid var(--line);
-    background:var(--panel);
-    padding:14px 16px;
-    font-family:var(--mono);
-    font-size:12px;
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-    justify-content:center
+
+/* ============================================================
+   STATUS PANEL
+   ============================================================ */
+
+.status {
+    border: 1px solid var(--line);
+    background: var(--panel);
+
+    padding: 14px 16px;
+
+    font-family: var(--mono);
+    font-size: 12px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+    justify-content: center;
 }
 
-.status .row{
-    display:flex;
-    justify-content:space-between;
-    gap:12px
+.status .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
 }
 
-.status .k{
-    color:var(--muted)
+.status .k {
+    color: var(--muted);
 }
 
-.status .v{
-    color:var(--text)
+.status .v {
+    color: var(--text);
 }
 
-.status .v.ok{
-    color:var(--accent)
+.status .v.ok {
+    color: var(--accent);
 }
 
-.status .v.off{
-    color:var(--bad)
+.status .v.off {
+    color: var(--bad);
 }
 
-/* =========================
+
+/* ============================================================
    CONTROLS
-   ========================= */
+   ============================================================ */
 
-.controls{
-    display:grid;
-    grid-template-columns:1fr 220px 200px 150px;
-    gap:0;
-    margin:20px 0 0;
-    border:1px solid var(--line);
-    background:var(--panel)
+.controls {
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        220px
+        200px
+        150px;
+
+    gap: 0;
+
+    margin: 20px 0 0;
+
+    border: 1px solid var(--line);
+
+    background: var(--panel);
 }
 
-.drop{
-    padding:22px 20px;
-    border-right:1px solid var(--line);
-    display:flex;
-    align-items:center;
-    gap:16px;
-    cursor:pointer;
-    transition:background .15s
+
+/* ============================================================
+   FILE DROP AREA
+   ============================================================ */
+
+.drop {
+    padding: 22px 20px;
+
+    border-right: 1px solid var(--line);
+
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    cursor: pointer;
+
+    transition: background .15s;
 }
 
 .drop:hover,
-.drop.hover{
-    background:#161A20
+.drop.hover {
+    background: #161A20;
 }
 
-.drop .icon{
-    width:44px;
-    height:44px;
-    border:1px dashed var(--line-2);
-    display:grid;
-    place-items:center;
-    font-family:var(--mono);
-    color:var(--accent);
-    font-size:18px
+.drop .icon {
+    width: 44px;
+    height: 44px;
+
+    border: 1px dashed var(--line-2);
+
+    display: grid;
+    place-items: center;
+
+    font-family: var(--mono);
+
+    color: var(--accent);
+
+    font-size: 18px;
 }
 
-.drop .title{
-    font-weight:600;
-    font-size:15px
+.drop .title {
+    font-weight: 600;
+    font-size: 15px;
 }
 
-.drop .hint{
-    font-family:var(--mono);
-    font-size:11px;
-    color:var(--muted);
-    letter-spacing:.06em;
-    margin-top:2px
+.drop .hint {
+    font-family: var(--mono);
+    font-size: 11px;
+
+    color: var(--muted);
+
+    letter-spacing: .06em;
+
+    margin-top: 2px;
 }
 
-.drop input{
-    display:none
+.drop input {
+    display: none;
 }
 
-/* Dropdown wrapper */
-.select{
-    padding:14px 16px;
-    border-right:1px solid var(--line);
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    gap:4px;
-    position:relative;
-    cursor:pointer;
-    transition:background .15s
+
+/* ============================================================
+   UPLOAD STATUS
+   ============================================================ */
+
+.upload-loading {
+    display: none;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 5px;
+
+    font-family: var(--mono);
+    font-size: 11px;
+
+    color: var(--accent);
 }
 
-.select:hover{
-    background:#161A20
+.upload-loading.active {
+    display: flex;
 }
 
-.select:focus-within{
-    background:#161A20;
-    box-shadow:inset 0 0 0 1px var(--accent)
+.upload-spinner {
+    width: 12px;
+    height: 12px;
+
+    border: 2px solid var(--line-2);
+
+    border-top-color: var(--accent);
+
+    border-radius: 50%;
+
+    animation: uploadSpin .7s linear infinite;
 }
 
-/* Visible dropdown arrow */
-.select::after{
-    content:"";
-    position:absolute;
-    right:18px;
-    top:50%;
-    width:8px;
-    height:8px;
-    border-right:2px solid var(--muted);
-    border-bottom:2px solid var(--muted);
-    transform:translateY(-65%) rotate(45deg);
-    pointer-events:none;
+.upload-check {
+    display: none;
+
+    font-size: 13px;
+
+    color: var(--accent);
+}
+
+@keyframes uploadSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* ============================================================
+   DROPDOWNS
+   ============================================================ */
+
+.select {
+    padding: 14px 16px;
+
+    border-right: 1px solid var(--line);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    gap: 4px;
+
+    position: relative;
+
+    cursor: pointer;
+
+    transition: background .15s;
+}
+
+.select:hover {
+    background: #161A20;
+}
+
+.select:focus-within {
+    background: #161A20;
+
+    box-shadow:
+        inset 0 0 0 1px var(--accent);
+}
+
+
+/* Dropdown arrow */
+
+.select::after {
+    content: "";
+
+    position: absolute;
+
+    right: 18px;
+    top: 50%;
+
+    width: 8px;
+    height: 8px;
+
+    border-right: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+
+    transform:
+        translateY(-65%)
+        rotate(45deg);
+
+    pointer-events: none;
+
     transition:
         border-color .2s,
-        transform .2s
+        transform .2s;
 }
 
 .select:hover::after,
-.select:focus-within::after{
-    border-color:var(--accent)
+.select:focus-within::after {
+    border-color: var(--accent);
 }
 
-/* Rotate arrow when the select receives focus */
-.select:focus-within::after{
-    transform:translateY(-25%) rotate(225deg)
+.select:focus-within::after {
+    transform:
+        translateY(-25%)
+        rotate(225deg);
 }
 
-.select label{
-    font-family:var(--mono);
-    font-size:10px;
-    letter-spacing:.14em;
-    color:var(--muted);
-    text-transform:uppercase
+.select label {
+    font-family: var(--mono);
+
+    font-size: 10px;
+
+    letter-spacing: .14em;
+
+    color: var(--muted);
+
+    text-transform: uppercase;
 }
 
-.select select{
-    appearance:none;
-    -webkit-appearance:none;
-    -moz-appearance:none;
+.select select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 
-    background:transparent;
-    border:0;
-    color:var(--text);
-    font-family:var(--mono);
-    font-size:13px;
+    background: transparent;
 
-    padding:4px 32px 4px 0;
-    outline:none;
-    cursor:pointer;
-    width:100%;
+    border: 0;
+
+    color: var(--text);
+
+    font-family: var(--mono);
+
+    font-size: 13px;
+
+    padding: 4px 32px 4px 0;
+
+    outline: none;
+
+    cursor: pointer;
+
+    width: 100%;
 }
 
-.select select:disabled{
-    color:var(--dim);
-    cursor:not-allowed;
+.select select:disabled {
+    color: var(--dim);
+    cursor: not-allowed;
 }
 
-.select select option{
-    background:var(--panel);
-    color:var(--text);
-    padding:8px
+.select select option {
+    background: var(--panel);
+    color: var(--text);
+
+    padding: 8px;
 }
 
-.select select option:checked{
-    background:var(--accent);
-    color:var(--accent-ink)
+
+/* ============================================================
+   RUN BUTTON
+   ============================================================ */
+
+.run {
+    background: var(--accent);
+    color: var(--accent-ink);
+
+    border: 0;
+
+    cursor: pointer;
+
+    font-family: var(--mono);
+
+    font-weight: 700;
+
+    letter-spacing: .12em;
+
+    font-size: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    transition: filter .15s;
 }
 
-.run{
-    background:var(--accent);
-    color:var(--accent-ink);
-    border:0;
-    cursor:pointer;
-    font-family:var(--mono);
-    font-weight:700;
-    letter-spacing:.12em;
-    font-size:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    transition:filter .15s
+.run:hover {
+    filter: brightness(1.08);
 }
 
-.run:hover{
-    filter:brightness(1.08)
+.run:disabled {
+    background: #2A313B;
+
+    color: var(--muted);
+
+    cursor: not-allowed;
 }
 
-.run:disabled{
-    background:#2A313B;
-    color:var(--muted);
-    cursor:not-allowed
-}
 
-/* =========================
+/* ============================================================
    RESULTS
-   ========================= */
+   ============================================================ */
 
-.results{
-    margin-top:28px;
-    display:grid;
-    grid-template-columns:repeat(12,1fr);
-    gap:16px
+.results {
+    margin-top: 28px;
+
+    display: grid;
+
+    grid-template-columns: repeat(12, 1fr);
+
+    gap: 16px;
 }
 
-.card{
-    grid-column:span 4;
-    background:var(--panel);
-    border:1px solid var(--line);
-    padding:18px 18px 16px;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    position:relative
+.card {
+    grid-column: span 4;
+
+    background: var(--panel);
+
+    border: 1px solid var(--line);
+
+    padding: 18px 18px 16px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+
+    position: relative;
 }
 
-.card::before{
-    content:"";
-    position:absolute;
-    left:0;
-    top:0;
-    bottom:0;
-    width:2px;
-    background:var(--line-2)
+.card::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 2px;
+
+    background: var(--line-2);
 }
 
-.card.kpi::before{
-    background:var(--accent)
+.card.kpi::before {
+    background: var(--accent);
 }
 
-.card .label{
-    font-family:var(--mono);
-    font-size:10px;
-    letter-spacing:.16em;
-    text-transform:uppercase;
-    color:var(--muted)
+.card .label {
+    font-family: var(--mono);
+
+    font-size: 10px;
+
+    letter-spacing: .16em;
+
+    text-transform: uppercase;
+
+    color: var(--muted);
 }
 
-.card .value{
-    font-family:var(--display);
-    font-weight:700;
-    font-size:40px;
-    letter-spacing:-.02em;
-    line-height:1
+.card .value {
+    font-family: var(--display);
+
+    font-weight: 700;
+
+    font-size: 40px;
+
+    letter-spacing: -.02em;
+
+    line-height: 1;
 }
 
-.card .delta{
-    font-family:var(--mono);
-    font-size:11px;
-    color:var(--muted)
+.card .delta {
+    font-family: var(--mono);
+
+    font-size: 11px;
+
+    color: var(--muted);
 }
 
-.card.wide{
-    grid-column:span 8
+.card.wide {
+    grid-column: span 8;
 }
 
-.card.full{
-    grid-column:span 12
+.card.full {
+    grid-column: span 12;
 }
 
-.card h3{
-    margin:0;
-    font-family:var(--mono);
-    font-size:11px;
-    letter-spacing:.16em;
-    text-transform:uppercase;
-    color:var(--muted);
-    font-weight:500;
-    display:flex;
-    align-items:center;
-    gap:8px
+.card h3 {
+    margin: 0;
+
+    font-family: var(--mono);
+
+    font-size: 11px;
+
+    letter-spacing: .16em;
+
+    text-transform: uppercase;
+
+    color: var(--muted);
+
+    font-weight: 500;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
 }
 
-.card h3::before{
-    content:"";
-    width:6px;
-    height:6px;
-    background:var(--accent);
-    display:inline-block
+.card h3::before {
+    content: "";
+
+    width: 6px;
+    height: 6px;
+
+    background: var(--accent);
+
+    display: inline-block;
 }
 
-.quality{
-    font-family:var(--mono);
-    font-size:11px;
-    color:var(--accent)
+.quality {
+    font-family: var(--mono);
+
+    font-size: 11px;
+
+    color: var(--accent);
 }
 
-.chart{
-    margin-top:12px;
-    display:flex;
-    flex-direction:column;
-    gap:8px
+
+/* ============================================================
+   DRIVER CHART
+   ============================================================ */
+
+.chart {
+    margin-top: 12px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
 }
 
-.bar-row{
-    display:grid;
-    grid-template-columns:180px 1fr 80px;
-    align-items:center;
-    gap:12px;
-    font-family:var(--mono);
-    font-size:12px
+.bar-row {
+    display: grid;
+
+    grid-template-columns:
+        180px
+        1fr
+        80px;
+
+    align-items: center;
+
+    gap: 12px;
+
+    font-family: var(--mono);
+
+    font-size: 12px;
 }
 
-.bar-row .name{
-    color:var(--text);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis
+.bar-row .name {
+    color: var(--text);
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
 }
 
-.bar-row .track{
-    height:14px;
-    background:#0F1216;
-    border:1px solid var(--line);
-    position:relative;
-    overflow:hidden
+.bar-row .track {
+    height: 14px;
+
+    background: #0F1216;
+
+    border: 1px solid var(--line);
+
+    position: relative;
+
+    overflow: hidden;
 }
 
-.bar-row .fill{
-    position:absolute;
-    left:0;
-    top:0;
-    bottom:0;
-    background:var(--accent);
-    box-shadow:inset -1px 0 0 rgba(0,0,0,.2);
-    transform-origin:left;
-    animation:grow .8s cubic-bezier(.2,.7,.2,1) both
+.bar-row .fill {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    background: var(--accent);
+
+    box-shadow:
+        inset -1px 0 0 rgba(0,0,0,.2);
+
+    transform-origin: left;
+
+    animation:
+        grow .8s cubic-bezier(.2,.7,.2,1) both;
 }
 
-.bar-row .num{
-    color:var(--muted);
-    text-align:right
+.bar-row .num {
+    color: var(--muted);
+
+    text-align: right;
 }
 
-@keyframes grow{
-    from{transform:scaleX(0)}
-    to{transform:scaleX(1)}
-}
-
-.anoms{
-    display:flex;
-    flex-direction:column;
-    margin-top:8px;
-    border-top:1px solid var(--line)
-}
-
-.anom{
-    display:grid;
-    grid-template-columns:80px 1fr auto;
-    gap:16px;
-    padding:12px 0;
-    border-bottom:1px solid var(--line);
-    align-items:center
-}
-
-.anom .sev{
-    font-family:var(--mono);
-    font-size:10px;
-    letter-spacing:.14em;
-    padding:3px 6px;
-    border:1px solid var(--line-2);
-    color:var(--warn);
-    text-align:center;
-    text-transform:uppercase
-}
-
-.anom.high .sev{
-    color:var(--bad);
-    border-color:var(--bad)
-}
-
-.anom.low .sev{
-    color:var(--good);
-    border-color:var(--good)
-}
-
-.anom .msg{
-    font-size:14px
-}
-
-.anom .msg small{
-    display:block;
-    color:var(--muted);
-    font-family:var(--mono);
-    font-size:11px;
-    margin-top:2px
-}
-
-.anom .val{
-    font-family:var(--mono);
-    font-size:13px;
-    color:var(--text)
-}
-
-.actions{
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-    margin-top:10px
-}
-
-.act{
-    border-left:2px solid var(--accent);
-    padding-left:14px
-}
-
-.act .t{
-    font-weight:600;
-    font-size:15px
-}
-
-.act .w{
-    color:var(--muted);
-    font-family:var(--mono);
-    font-size:11px;
-    margin-top:4px;
-    line-height:1.5
-}
-
-.brief{
-    position:relative
-}
-
-.brief .copy{
-    position:absolute;
-    top:16px;
-    right:16px;
-    background:transparent;
-    border:1px solid var(--line-2);
-    color:var(--muted);
-    font-family:var(--mono);
-    font-size:11px;
-    letter-spacing:.1em;
-    padding:6px 10px;
-    cursor:pointer
-}
-
-.brief .copy:hover{
-    color:var(--accent);
-    border-color:var(--accent)
-}
-
-.brief .body{
-    font-family:var(--display);
-    font-size:18px;
-    line-height:1.55;
-    margin-top:12px;
-    max-width:72ch
-}
-
-.brief .body p{
-    margin:0 0 10px
-}
-
-.brief .body strong{
-    color:var(--accent);
-    font-weight:600
-}
-
-.disc{
-    font-family:var(--mono);
-    font-size:11px;
-    color:var(--warn);
-    letter-spacing:.04em
-}
-
-.empty{
-    padding:60px 20px;
-    text-align:center;
-    color:var(--muted);
-    font-family:var(--mono);
-    font-size:12px;
-    letter-spacing:.1em
-}
-
-.loading{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    padding:24px
-}
-
-.loading .line{
-    font-family:var(--mono);
-    font-size:12px;
-    color:var(--muted)
-}
-
-.loading .line b{
-    color:var(--accent);
-    font-weight:500
-}
-
-.loading .line .cursor{
-    display:inline-block;
-    width:8px;
-    height:14px;
-    background:var(--accent);
-    vertical-align:-2px;
-    animation:blink 1s steps(2) infinite
-}
-
-@keyframes blink{
-    50%{opacity:0}
-}
-
-.err{
-    border:1px solid var(--bad);
-    background:#1a0e0e;
-    padding:14px;
-    font-family:var(--mono);
-    font-size:12px;
-    color:#ffb4b4;
-    white-space:pre-wrap
-}
-
-.foot{
-    margin-top:40px;
-    padding-top:20px;
-    border-top:1px solid var(--line);
-    display:flex;
-    justify-content:space-between;
-    font-family:var(--mono);
-    font-size:11px;
-    color:var(--dim);
-    letter-spacing:.08em
-}
-
-@media (max-width:900px){
-    .hero{
-        grid-template-columns:1fr
+@keyframes grow {
+    from {
+        transform: scaleX(0);
     }
 
-    .controls{
-        grid-template-columns:1fr
+    to {
+        transform: scaleX(1);
+    }
+}
+
+
+/* ============================================================
+   ANOMALIES
+   ============================================================ */
+
+.anoms {
+    display: flex;
+
+    flex-direction: column;
+
+    margin-top: 8px;
+
+    border-top: 1px solid var(--line);
+}
+
+.anom {
+    display: grid;
+
+    grid-template-columns:
+        80px
+        1fr
+        auto;
+
+    gap: 16px;
+
+    padding: 12px 0;
+
+    border-bottom: 1px solid var(--line);
+
+    align-items: center;
+}
+
+.anom .sev {
+    font-family: var(--mono);
+
+    font-size: 10px;
+
+    letter-spacing: .14em;
+
+    padding: 3px 6px;
+
+    border: 1px solid var(--line-2);
+
+    color: var(--warn);
+
+    text-align: center;
+
+    text-transform: uppercase;
+}
+
+.anom.high .sev {
+    color: var(--bad);
+
+    border-color: var(--bad);
+}
+
+.anom.low .sev {
+    color: var(--good);
+
+    border-color: var(--good);
+}
+
+.anom .msg {
+    font-size: 14px;
+}
+
+.anom .msg small {
+    display: block;
+
+    color: var(--muted);
+
+    font-family: var(--mono);
+
+    font-size: 11px;
+
+    margin-top: 2px;
+}
+
+.anom .val {
+    font-family: var(--mono);
+
+    font-size: 13px;
+
+    color: var(--text);
+}
+
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+
+.actions {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 14px;
+
+    margin-top: 10px;
+}
+
+.act {
+    border-left: 2px solid var(--accent);
+
+    padding-left: 14px;
+}
+
+.act .t {
+    font-weight: 600;
+
+    font-size: 15px;
+}
+
+.act .w {
+    color: var(--muted);
+
+    font-family: var(--mono);
+
+    font-size: 11px;
+
+    margin-top: 4px;
+
+    line-height: 1.5;
+}
+
+
+/* ============================================================
+   EXECUTIVE BRIEF
+   ============================================================ */
+
+.brief {
+    position: relative;
+}
+
+.brief .copy {
+    position: absolute;
+
+    top: 16px;
+    right: 16px;
+
+    background: transparent;
+
+    border: 1px solid var(--line-2);
+
+    color: var(--muted);
+
+    font-family: var(--mono);
+
+    font-size: 11px;
+
+    letter-spacing: .1em;
+
+    padding: 6px 10px;
+
+    cursor: pointer;
+}
+
+.brief .copy:hover {
+    color: var(--accent);
+
+    border-color: var(--accent);
+}
+
+.brief .body {
+    font-family: var(--display);
+
+    font-size: 18px;
+
+    line-height: 1.55;
+
+    margin-top: 12px;
+
+    max-width: 72ch;
+}
+
+.brief .body p {
+    margin: 0 0 10px;
+}
+
+.brief .body strong {
+    color: var(--accent);
+
+    font-weight: 600;
+}
+
+
+/* ============================================================
+   OTHER UI
+   ============================================================ */
+
+.disc {
+    font-family: var(--mono);
+
+    font-size: 11px;
+
+    color: var(--warn);
+
+    letter-spacing: .04em;
+}
+
+.empty {
+    padding: 60px 20px;
+
+    text-align: center;
+
+    color: var(--muted);
+
+    font-family: var(--mono);
+
+    font-size: 12px;
+
+    letter-spacing: .1em;
+}
+
+.loading {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    padding: 24px;
+}
+
+.loading .line {
+    font-family: var(--mono);
+
+    font-size: 12px;
+
+    color: var(--muted);
+}
+
+.loading .line b {
+    color: var(--accent);
+
+    font-weight: 500;
+}
+
+.loading .line .cursor {
+    display: inline-block;
+
+    width: 8px;
+    height: 14px;
+
+    background: var(--accent);
+
+    vertical-align: -2px;
+
+    animation:
+        blink 1s steps(2) infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.err {
+    border: 1px solid var(--bad);
+
+    background: #1a0e0e;
+
+    padding: 14px;
+
+    font-family: var(--mono);
+
+    font-size: 12px;
+
+    color: #ffb4b4;
+
+    white-space: pre-wrap;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+    .hero {
+        grid-template-columns: 1fr;
+    }
+
+    .controls {
+        grid-template-columns: 1fr;
     }
 
     .drop,
-    .select{
-        border-right:0;
-        border-bottom:1px solid var(--line)
+    .select {
+        border-right: 0;
+
+        border-bottom: 1px solid var(--line);
     }
 
     .card,
     .card.wide,
-    .card.full{
-        grid-column:span 12
+    .card.full {
+        grid-column: span 12;
     }
 
-    .bar-row{
-        grid-template-columns:120px 1fr 60px
+    .bar-row {
+        grid-template-columns:
+            120px
+            1fr
+            60px;
     }
 }
+
 </style>
 </head>
+
 
 <body>
 
 <div class="app">
 
-    <div class="bar">
-        <div class="brand">
-            <span class="dot"></span>
-            DataBrief
-            <span class="sub">// AI DATA ANALYST</span>
-        </div>
 
-        <div class="spacer"></div>
+<!-- ============================================================
+     TOP BAR
+     ============================================================ -->
 
-        <div class="meta">
-            STATUS <b id="statusText">IDLE</b>
-            · MODEL <b id="modelText">iforest·xgboost</b>
-            · <b id="ts"></b>
-        </div>
-    </div>
+<div class="bar">
 
-    <div class="hero">
+    <div class="brand">
 
-        <div>
-            <h1>
-                Turn a messy sheet into<br>
-                <em>an executive brief.</em>
-            </h1>
+        <span class="dot"></span>
 
-            <p>
-                Drop a CSV, Excel, or JSON file. DataBrief computes anomalies
-                and ranks the drivers behind your target, then an AI writes
-                a short brief grounded in those numbers.
-            </p>
-        </div>
+        DataBrief
 
-        <div class="status">
-            <div class="row">
-                <span class="k">endpoint</span>
-                <span class="v" id="conn">● checking</span>
-            </div>
-
-            <div class="row">
-                <span class="k">last run</span>
-                <span class="v" id="lastRun">—</span>
-            </div>
-
-            <div class="row">
-                <span class="k">rows analyzed</span>
-                <span class="v" id="rowsCount">—</span>
-            </div>
-
-            <div class="row">
-                <span class="k">latency</span>
-                <span class="v" id="latency">—</span>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="controls">
-
-        <!-- FILE UPLOAD -->
-
-        <label class="drop" id="drop" for="file">
-
-            <div class="icon">+</div>
-
-            <div>
-                <div class="title" id="fileName">
-                    Drop file or click to upload
-                </div>
-
-                <div class="hint">
-                    CSV · XLSX · JSON — max 4 MB
-                </div>
-            </div>
-
-            <input
-                id="file"
-                type="file"
-                accept=".csv,.xlsx,.xls,.json"
-            />
-
-        </label>
-
-
-        <!-- ANALYSIS TYPE -->
-
-        <div class="select">
-
-            <label>analysis</label>
-
-            <select id="mode">
-
-                <option value="full">
-                    Full Analysis — Anomalies + Drivers + Brief
-                </option>
-
-                <option value="anomalies">
-                    Anomaly Detection
-                </option>
-
-                <option value="drivers">
-                    Driver Analysis
-                </option>
-
-            </select>
-
-        </div>
-
-
-        <!-- PREDICT COLUMN -->
-
-        <div class="select">
-
-            <label>predict column</label>
-
-            <select id="target" disabled>
-
-                <option value="">
-                    Upload file first
-                </option>
-
-            </select>
-
-        </div>
-
-
-        <!-- RUN -->
-
-        <button class="run" id="run" disabled>
-            RUN <span>&rarr;</span>
-        </button>
+        <span class="sub">
+            // AI DATA ANALYST
+        </span>
 
     </div>
 
 
-    <div id="results" class="results">
+    <div class="spacer"></div>
 
-        <div class="card full">
-            <div class="empty">
-                // awaiting input — upload a file and press RUN
-            </div>
+
+    <div class="meta">
+
+        STATUS
+        <b id="statusText">IDLE</b>
+
+        · MODEL
+
+        <b id="modelText">
+            iforest·xgboost
+        </b>
+
+        ·
+
+        <b id="ts"></b>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+
+<div class="hero">
+
+    <div>
+
+        <h1>
+            Turn a messy sheet into<br>
+            <em>an executive brief.</em>
+        </h1>
+
+        <p>
+            Drop a CSV, Excel, or JSON file.
+            DataBrief computes anomalies and ranks the drivers
+            behind your target, then an AI writes a short brief
+            grounded in those numbers.
+        </p>
+
+    </div>
+
+
+    <div class="status">
+
+        <div class="row">
+
+            <span class="k">
+                endpoint
+            </span>
+
+            <span
+                class="v"
+                id="conn"
+            >
+                ● checking
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span class="k">
+                last run
+            </span>
+
+            <span
+                class="v"
+                id="lastRun"
+            >
+                —
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span class="k">
+                rows analyzed
+            </span>
+
+            <span
+                class="v"
+                id="rowsCount"
+            >
+                —
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span class="k">
+                latency
+            </span>
+
+            <span
+                class="v"
+                id="latency"
+            >
+                —
+            </span>
+
         </div>
 
     </div>
@@ -871,22 +1227,192 @@ body::before{
 </div>
 
 
+<!-- ============================================================
+     CONTROLS
+     ============================================================ -->
+
+<div class="controls">
+
+
+    <!-- FILE UPLOAD -->
+
+    <label
+        class="drop"
+        id="drop"
+        for="file"
+    >
+
+        <div class="icon">
+            +
+        </div>
+
+
+        <div>
+
+            <div
+                class="title"
+                id="fileName"
+            >
+                Drop file or click to upload
+            </div>
+
+
+            <div
+                class="hint"
+                id="fileHint"
+            >
+                CSV · XLSX · JSON — max 4 MB
+            </div>
+
+
+            <!-- Upload status -->
+
+            <div
+                class="upload-loading"
+                id="uploadLoading"
+            >
+
+                <span
+                    class="upload-spinner"
+                    id="uploadSpinner"
+                ></span>
+
+
+                <span
+                    class="upload-check"
+                    id="uploadCheck"
+                >
+                    ✓
+                </span>
+
+
+                <span id="uploadStatus">
+                    Uploading file...
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <input
+            id="file"
+            type="file"
+            accept=".csv,.xlsx,.xls,.json"
+        />
+
+    </label>
+
+
+    <!-- ANALYSIS -->
+
+    <div class="select">
+
+        <label>
+            analysis
+        </label>
+
+
+        <select id="mode">
+
+            <option value="full">
+                Full Analysis — Anomalies + Drivers + Brief
+            </option>
+
+            <option value="anomalies">
+                Anomaly Detection
+            </option>
+
+            <option value="drivers">
+                Driver Analysis
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- PREDICT COLUMN -->
+
+    <div class="select">
+
+        <label>
+            predict column
+        </label>
+
+
+        <select
+            id="target"
+            disabled
+        >
+
+            <option value="">
+                Upload file first
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- RUN -->
+
+    <button
+        class="run"
+        id="run"
+        disabled
+    >
+
+        RUN
+
+        <span>
+            &rarr;
+        </span>
+
+    </button>
+
+
+</div>
+
+
+<!-- ============================================================
+     RESULTS
+     ============================================================ -->
+
+<div
+    id="results"
+    class="results"
+>
+
+    <div class="card full">
+
+        <div class="empty">
+            // awaiting input — upload a file and press RUN
+        </div>
+
+    </div>
+
+</div>
+
+
+</div>
+
+
 <script>
+
+/* ============================================================
+   CONFIGURATION
+   ============================================================ */
 
 const API = window.location.origin;
 
-const MAX_FILE_SIZE = 4 * 1024 * 1024;
+const MAX_FILE_SIZE =
+    4 * 1024 * 1024;
 
 
-/*
-|--------------------------------------------------------------------------
-| ANALYSIS MODES
-|--------------------------------------------------------------------------
-|
-| These correspond to the analysis modes already supported by the
-| existing frontend/backend integration.
-|
-*/
+/* ============================================================
+   ANALYSIS MODES
+   ============================================================ */
 
 const MODE_MAP = {
 
@@ -908,73 +1434,96 @@ const MODE_MAP = {
 };
 
 
-/*
-|--------------------------------------------------------------------------
-| CLOCK
-|--------------------------------------------------------------------------
-*/
+/* ============================================================
+   CLOCK
+   ============================================================ */
 
-const tsEl = document.getElementById('ts');
+const tsEl =
+    document.getElementById('ts');
 
-function tick(){
+
+function tick() {
 
     tsEl.textContent =
         new Date()
             .toISOString()
-            .replace('T',' ')
-            .slice(0,19) + 'Z';
+            .replace('T', ' ')
+            .slice(0, 19) + 'Z';
 
 }
 
+
 tick();
 
-setInterval(tick,1000);
+setInterval(tick, 1000);
 
 
-/*
-|--------------------------------------------------------------------------
-| BACKEND HEALTH CHECK
-|--------------------------------------------------------------------------
-*/
+/* ============================================================
+   BACKEND HEALTH CHECK
+   ============================================================ */
 
 fetch(API + "/health")
 
-    .then(r => r.json())
+    .then(response => response.json())
 
     .then(() => {
 
-        document.getElementById('conn').textContent =
+        const conn =
+            document.getElementById('conn');
+
+        conn.textContent =
             "● connected";
 
-        document.getElementById('conn').className =
+        conn.className =
             "v ok";
 
     })
 
     .catch(() => {
 
-        document.getElementById('conn').textContent =
+        const conn =
+            document.getElementById('conn');
+
+        conn.textContent =
             "● offline";
 
-        document.getElementById('conn').className =
+        conn.className =
             "v off";
 
     });
 
 
-/*
-|--------------------------------------------------------------------------
-| FILE UPLOAD ELEMENTS
-|--------------------------------------------------------------------------
-*/
+/* ============================================================
+   ELEMENTS
+   ============================================================ */
 
-const drop = document.getElementById('drop');
+const drop =
+    document.getElementById('drop');
 
-const file = document.getElementById('file');
+const file =
+    document.getElementById('file');
 
-const fileName = document.getElementById('fileName');
+const fileName =
+    document.getElementById('fileName');
 
-const runBtn = document.getElementById('run');
+const runBtn =
+    document.getElementById('run');
+
+const target =
+    document.getElementById('target');
+
+const uploadLoading =
+    document.getElementById('uploadLoading');
+
+const uploadSpinner =
+    document.getElementById('uploadSpinner');
+
+const uploadCheck =
+    document.getElementById('uploadCheck');
+
+const uploadStatus =
+    document.getElementById('uploadStatus');
+
 
 let payload = null;
 
@@ -983,87 +1532,104 @@ let uploadedName = null;
 let uploading = false;
 
 
-/*
-|--------------------------------------------------------------------------
-| DRAG & DROP
-|--------------------------------------------------------------------------
-*/
+/* ============================================================
+   DRAG & DROP
+   ============================================================ */
 
-['dragover','dragenter'].forEach(eventName => {
+['dragover', 'dragenter'].forEach(eventName => {
 
-    drop.addEventListener(eventName, event => {
+    drop.addEventListener(
+        eventName,
+        event => {
+
+            event.preventDefault();
+
+            drop.classList.add('hover');
+
+        }
+    );
+
+});
+
+
+['dragleave', 'drop'].forEach(eventName => {
+
+    drop.addEventListener(
+        eventName,
+        () => {
+
+            drop.classList.remove('hover');
+
+        }
+    );
+
+});
+
+
+drop.addEventListener(
+    'drop',
+    event => {
 
         event.preventDefault();
 
-        drop.classList.add('hover');
+        if (event.dataTransfer.files[0]) {
 
-    });
+            file.files =
+                event.dataTransfer.files;
 
-});
+            onFile();
 
-
-['dragleave','drop'].forEach(eventName => {
-
-    drop.addEventListener(eventName, () => {
-
-        drop.classList.remove('hover');
-
-    });
-
-});
-
-
-drop.addEventListener('drop', event => {
-
-    event.preventDefault();
-
-    if(event.dataTransfer.files[0]){
-
-        file.files = event.dataTransfer.files;
-
-        onFile();
+        }
 
     }
-
-});
-
-
-file.addEventListener('change', onFile);
+);
 
 
-/*
-|--------------------------------------------------------------------------
-| FILE SELECTION / UPLOAD
-|--------------------------------------------------------------------------
-*/
+file.addEventListener(
+    'change',
+    onFile
+);
 
-async function onFile(){
 
-    const f = file.files[0];
+/* ============================================================
+   FILE UPLOAD
+   ============================================================ */
 
-    if(!f) return;
+async function onFile() {
+
+    const f =
+        file.files[0];
+
+
+    if (!f) {
+        return;
+    }
+
 
     payload = f;
 
-    fileName.textContent =
-        f.name + ' · ' +
-        (f.size / 1024).toFixed(1) +
-        ' KB';
+    uploadedName = null;
 
     runBtn.disabled = true;
 
-    uploadedName = null;
+
+    fileName.textContent =
+        f.name +
+        ' · ' +
+        (f.size / 1024).toFixed(1) +
+        ' KB';
+
 
     resetTarget();
 
 
-    /*
-    |---------------------------------------------------------------
-    | FILE SIZE CHECK
-    |---------------------------------------------------------------
-    */
+    /* --------------------------------------------------------
+       FILE SIZE CHECK
+       -------------------------------------------------------- */
 
-    if(f.size > MAX_FILE_SIZE){
+    if (f.size > MAX_FILE_SIZE) {
+
+        uploadLoading.classList.remove('active');
 
         renderError(
             new Error(
@@ -1074,8 +1640,23 @@ async function onFile(){
         setStatus('ERROR');
 
         return;
-
     }
+
+
+    /* --------------------------------------------------------
+       SHOW UPLOAD LOADER
+       -------------------------------------------------------- */
+
+    uploadLoading.classList.add('active');
+
+    uploadSpinner.style.display =
+        'block';
+
+    uploadCheck.style.display =
+        'none';
+
+    uploadStatus.textContent =
+        'Uploading file...';
 
 
     uploading = true;
@@ -1083,65 +1664,77 @@ async function onFile(){
     setStatus('UPLOADING');
 
 
-    try{
+    try {
 
-        /*
-        |-----------------------------------------------------------
-        | Send file to existing backend upload endpoint
-        |-----------------------------------------------------------
-        */
+        /* ----------------------------------------------------
+           SEND FILE TO EXISTING BACKEND
+           ---------------------------------------------------- */
 
-        const fd = new FormData();
+        const fd =
+            new FormData();
 
-        fd.append('file', f);
-
-
-        const up = await fetch(
-            API + "/api/upload",
-            {
-                method:"POST",
-                body:fd
-            }
+        fd.append(
+            'file',
+            f
         );
 
 
-        if(!up.ok){
+        const response =
+            await fetch(
+                API + "/api/upload",
+                {
+                    method: "POST",
+                    body: fd
+                }
+            );
+
+
+        if (!response.ok) {
 
             throw new Error(
                 "Upload failed (" +
-                up.status +
+                response.status +
                 "): " +
-                await up.text()
+                await response.text()
             );
 
         }
 
 
-        const upData = await up.json();
+        const upData =
+            await response.json();
 
 
-        /*
-        |-----------------------------------------------------------
-        | Backend tells us the uploaded filename
-        |-----------------------------------------------------------
-        */
+        /* ----------------------------------------------------
+           STORE UPLOAD NAME
+           ---------------------------------------------------- */
 
         uploadedName =
             upData.summary.filename;
 
 
-        /*
-        |-----------------------------------------------------------
-        | IMPORTANT:
-        |
-        | Get the column names returned by the backend and
-        | populate the Predict Column dropdown.
-        |-----------------------------------------------------------
-        */
+        /* ----------------------------------------------------
+           POPULATE PREDICT COLUMN
+           USING BACKEND-DETECTED COLUMNS
+           ---------------------------------------------------- */
 
         populateTarget(
             upData.summary.column_names || []
         );
+
+
+        /* ----------------------------------------------------
+           SHOW SUCCESS STATE
+           ---------------------------------------------------- */
+
+        uploadSpinner.style.display =
+            'none';
+
+        uploadCheck.style.display =
+            'inline';
+
+        uploadStatus.textContent =
+            'File ready · columns detected';
 
 
         setStatus('READY');
@@ -1149,13 +1742,18 @@ async function onFile(){
         runBtn.disabled = false;
 
 
-    }catch(err){
+    } catch (err) {
+
+        uploadLoading.classList.remove(
+            'active'
+        );
 
         renderError(err);
 
         setStatus('ERROR');
 
-    }finally{
+
+    } finally {
 
         uploading = false;
 
@@ -1164,17 +1762,11 @@ async function onFile(){
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| RESET PREDICT COLUMN
-|--------------------------------------------------------------------------
-*/
+/* ============================================================
+   RESET PREDICT COLUMN
+   ============================================================ */
 
-function resetTarget(){
-
-    const target =
-        document.getElementById('target');
-
+function resetTarget() {
 
     target.innerHTML = `
         <option value="">
@@ -1182,52 +1774,21 @@ function resetTarget(){
         </option>
     `;
 
-
     target.disabled = true;
 
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| POPULATE PREDICT COLUMN
-|--------------------------------------------------------------------------
-|
-| The backend supplies the actual columns from the uploaded file.
-|
-| Example:
-|
-| Backend returns:
-|
-| [
-|   "Date",
-|   "Sales",
-|   "Profit",
-|   "Region"
-| ]
-|
-| Dropdown becomes:
-|
-| Auto-detect
-| Date
-| Sales
-| Profit
-| Region
-|
-*/
+/* ============================================================
+   POPULATE PREDICT COLUMN
+   ============================================================ */
 
-function populateTarget(cols){
-
-    const target =
-        document.getElementById('target');
-
+function populateTarget(cols) {
 
     target.innerHTML = "";
 
 
-    /*
-    | Always keep Auto-detect as the first option.
-    */
+    /* Auto-detect */
 
     const autoOption =
         document.createElement('option');
@@ -1237,61 +1798,58 @@ function populateTarget(cols){
     autoOption.textContent =
         "Auto-detect";
 
-    target.appendChild(autoOption);
+    target.appendChild(
+        autoOption
+    );
 
 
-    /*
-    | Add every column returned by the backend.
-    */
+    /* Backend-provided columns */
 
     cols.forEach(column => {
 
         const option =
             document.createElement('option');
 
-        option.value = column;
+        option.value =
+            column;
 
-        option.textContent = column;
+        option.textContent =
+            column;
 
-        target.appendChild(option);
+        target.appendChild(
+            option
+        );
 
     });
 
-
-    /*
-    | Enable the dropdown after the backend has
-    | successfully returned the columns.
-    */
 
     target.disabled = false;
 
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| RUN ANALYSIS
-|--------------------------------------------------------------------------
-*/
+/* ============================================================
+   RUN BUTTON
+   ============================================================ */
 
-runBtn.addEventListener('click', run);
+runBtn.addEventListener(
+    'click',
+    run
+);
 
 
-async function run(){
+async function run() {
 
-    if(uploading){
-
+    if (uploading) {
         return;
-
     }
 
 
-    if(!uploadedName){
+    if (!uploadedName) {
 
         setStatus('NO FILE');
 
         return;
-
     }
 
 
@@ -1304,36 +1862,47 @@ async function run(){
     renderLoading();
 
 
-    try{
+    try {
 
         const mode =
             document.getElementById('mode').value;
 
 
-        const target =
-            document.getElementById('target').value;
+        const selectedTarget =
+            document
+                .getElementById('target')
+                .value;
 
 
         const data =
             await analyze(
                 payload,
                 mode,
-                target
+                selectedTarget
             );
 
 
-        document.getElementById('latency').textContent =
+        document.getElementById(
+            'latency'
+        ).textContent =
             (data.execution_time_seconds || '?') +
             ' s';
 
 
-        document.getElementById('lastRun').textContent =
-            new Date().toLocaleTimeString();
+        document.getElementById(
+            'lastRun'
+        ).textContent =
+            new Date()
+                .toLocaleTimeString();
 
 
-        document.getElementById('rowsCount').textContent =
-            (data.data_summary?.rows || 0)
-                .toLocaleString();
+        document.getElementById(
+            'rowsCount'
+        ).textContent =
+            (
+                data.data_summary?.rows ||
+                0
+            ).toLocaleString();
 
 
         renderResults(data);
@@ -1341,13 +1910,14 @@ async function run(){
         setStatus('DONE');
 
 
-    }catch(err){
+    } catch (err) {
 
         renderError(err);
 
         setStatus('ERROR');
 
-    }finally{
+
+    } finally {
 
         document.title =
             'DataBrief // AI data analyst';
@@ -1357,42 +1927,39 @@ async function run(){
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| STATUS
-|--------------------------------------------------------------------------
-*/
+/* ============================================================
+   STATUS
+   ============================================================ */
 
-function setStatus(s){
+function setStatus(s) {
 
-    document.getElementById('statusText').textContent =
-        s;
+    document.getElementById(
+        'statusText'
+    ).textContent = s;
 
 
     const fr =
-        document.getElementById('footRight');
+        document.getElementById(
+            'footRight'
+        );
 
 
-    if(fr){
-
+    if (fr) {
         fr.textContent = s;
-
     }
 
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| ANALYSIS API
-|--------------------------------------------------------------------------
-*/
+/* ============================================================
+   ANALYSIS API
+   ============================================================ */
 
 async function analyze(
     fileToAnalyze,
     mode,
-    target
-){
+    selectedTarget
+) {
 
     const analyses =
         MODE_MAP[mode] ||
@@ -1415,59 +1982,54 @@ async function analyze(
     );
 
 
-    /*
-    | Only send target_column when the user has selected
-    | a specific column.
-    |
-    | Empty value = backend auto-detect.
-    */
+    /* Only send a target when user selected one */
 
-    if(target){
+    if (selectedTarget) {
 
         body.append(
             'target_column',
-            target
+            selectedTarget
         );
 
     }
 
 
-    const an =
+    const response =
         await fetch(
             API + "/api/full-analysis-file",
             {
-                method:"POST",
+                method: "POST",
                 body
             }
         );
 
 
-    if(!an.ok){
+    if (!response.ok) {
 
         throw new Error(
             "Analysis failed (" +
-            an.status +
+            response.status +
             "): " +
-            await an.text()
+            await response.text()
         );
 
     }
 
 
-    return an.json();
+    return response.json();
 
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| LOADING SCREEN
-|--------------------------------------------------------------------------
-*/
+/* ============================================================
+   ANALYSIS LOADING SCREEN
+   ============================================================ */
 
-function renderLoading(){
+function renderLoading() {
 
-    document.getElementById('results').innerHTML = `
+    document.getElementById(
+        'results'
+    ).innerHTML = `
 
         <div class="card full">
 
@@ -1506,19 +2068,21 @@ function renderLoading(){
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| ERROR
-|--------------------------------------------------------------------------
-*/
+/* ============================================================
+   ERROR
+   ============================================================ */
 
-function renderError(err){
+function renderError(err) {
 
-    document.getElementById('results').innerHTML = `
+    document.getElementById(
+        'results'
+    ).innerHTML = `
 
         <div class="card full">
 
-            <h3>error</h3>
+            <h3>
+                error
+            </h3>
 
             <div class="err">
                 ${(err && err.stack) || String(err)}
@@ -1531,17 +2095,15 @@ function renderError(err){
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| KPI CARD
-|--------------------------------------------------------------------------
-*/
+/* ============================================================
+   KPI CARD
+   ============================================================ */
 
 function kpiCard(
     label,
     value,
     sub
-){
+) {
 
     return `
 
@@ -1566,13 +2128,11 @@ function kpiCard(
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| RESULTS
-|--------------------------------------------------------------------------
-*/
+/* ============================================================
+   RENDER RESULTS
+   ============================================================ */
 
-function renderResults(d){
+function renderResults(d) {
 
     const ds =
         d.data_summary || {};
@@ -1597,6 +2157,10 @@ function renderResults(d){
             ?.anomalies_detected;
 
 
+    /* --------------------------------------------------------
+       ANOMALY RATE
+       -------------------------------------------------------- */
+
     const anomRate =
         (
             anomaly &&
@@ -1617,6 +2181,10 @@ function renderResults(d){
           " rows"
         : "not run";
 
+
+    /* --------------------------------------------------------
+       MODEL QUALITY
+       -------------------------------------------------------- */
 
     const q =
         driver &&
@@ -1642,11 +2210,9 @@ function renderResults(d){
     let html = "";
 
 
-    /*
-    |---------------------------------------------------------------
-    | KPI CARDS
-    |---------------------------------------------------------------
-    */
+    /* --------------------------------------------------------
+       KPI CARDS
+       -------------------------------------------------------- */
 
     html += kpiCard(
         "Rows",
@@ -1669,17 +2235,15 @@ function renderResults(d){
     );
 
 
-    /*
-    |---------------------------------------------------------------
-    | DRIVER ANALYSIS
-    |---------------------------------------------------------------
-    */
+    /* --------------------------------------------------------
+       DRIVER ANALYSIS
+       -------------------------------------------------------- */
 
-    if(
+    if (
         driver &&
         driver.drivers &&
         driver.drivers.length
-    ){
+    ) {
 
         const max =
             driver.drivers[0].importance || 1;
@@ -1734,11 +2298,13 @@ function renderResults(d){
                 </h3>
 
                 <span class="quality">
+
                     model quality ${modelVal}
                     —
                     ${q ? q.interpretation : ''}
                     ·
                     ${driver.compute_device}
+
                 </span>
 
                 <div class="chart">
@@ -1752,27 +2318,27 @@ function renderResults(d){
     }
 
 
-    /*
-    |---------------------------------------------------------------
-    | ANOMALIES
-    |---------------------------------------------------------------
-    */
+    /* --------------------------------------------------------
+       ANOMALIES
+       -------------------------------------------------------- */
 
     let anomInner = "";
 
 
-    if(
+    if (
         detected &&
         detected.length
-    ){
+    ) {
 
         anomInner =
             detected
                 .map(a => {
 
                     const sev =
-                        (a.severity || "med")
-                            .toLowerCase();
+                        (
+                            a.severity ||
+                            "med"
+                        ).toLowerCase();
 
 
                     return `
@@ -1809,10 +2375,10 @@ function renderResults(d){
     }
 
 
-    else if(
+    else if (
         anomaly &&
         anomaly.per_column_outliers
-    ){
+    ) {
 
         anomInner =
             Object.keys(
@@ -1859,10 +2425,14 @@ function renderResults(d){
     }
 
 
-    if(anomInner){
+    if (anomInner) {
 
         const n =
-            (detected && detected.length) ||
+            (
+                detected &&
+                detected.length
+            )
+            ||
             Object.keys(
                 anomaly?.per_column_outliers || {}
             ).length;
@@ -1887,19 +2457,17 @@ function renderResults(d){
     }
 
 
-    /*
-    |---------------------------------------------------------------
-    | EXECUTIVE BRIEF
-    |---------------------------------------------------------------
-    */
+    /* --------------------------------------------------------
+       EXECUTIVE BRIEF
+       -------------------------------------------------------- */
 
-    if(brief.headline){
+    if (brief.headline) {
 
         let body =
             `<p><strong>${brief.headline}</strong></p>`;
 
 
-        if(brief.bottom_line){
+        if (brief.bottom_line) {
 
             body +=
                 `<p>${brief.bottom_line}</p>`;
@@ -1933,16 +2501,14 @@ function renderResults(d){
     }
 
 
-    /*
-    |---------------------------------------------------------------
-    | RECOMMENDED ACTIONS
-    |---------------------------------------------------------------
-    */
+    /* --------------------------------------------------------
+       RECOMMENDED ACTIONS
+       -------------------------------------------------------- */
 
-    if(
+    if (
         brief.top_actions &&
         brief.top_actions.length
-    ){
+    ) {
 
         const acts =
             brief.top_actions
@@ -1983,13 +2549,11 @@ function renderResults(d){
     }
 
 
-    /*
-    |---------------------------------------------------------------
-    | DISCLAIMER
-    |---------------------------------------------------------------
-    */
+    /* --------------------------------------------------------
+       DISCLAIMER
+       -------------------------------------------------------- */
 
-    if(d.disclaimer){
+    if (d.disclaimer) {
 
         html += `
 
@@ -2006,30 +2570,33 @@ function renderResults(d){
     }
 
 
-    document.getElementById('results').innerHTML =
-        html;
+    document.getElementById(
+        'results'
+    ).innerHTML = html;
 
 
-    /*
-    |---------------------------------------------------------------
-    | COPY EXECUTIVE BRIEF
-    |---------------------------------------------------------------
-    */
+    /* --------------------------------------------------------
+       COPY BRIEF
+       -------------------------------------------------------- */
 
     const cb =
-        document.getElementById('copyBrief');
+        document.getElementById(
+            'copyBrief'
+        );
 
 
-    if(cb){
+    if (cb) {
 
         cb.addEventListener(
             'click',
             () => {
 
                 navigator.clipboard.writeText(
-                    document.querySelector(
-                        '.brief .body'
-                    ).innerText
+                    document
+                        .querySelector(
+                            '.brief .body'
+                        )
+                        .innerText
                 );
 
 
@@ -2038,7 +2605,10 @@ function renderResults(d){
 
 
                 setTimeout(
-                    () => cb.textContent = 'COPY',
+                    () => {
+                        cb.textContent =
+                            'COPY';
+                    },
                     1200
                 );
 
@@ -2053,4 +2623,4 @@ function renderResults(d){
 
 </body>
 </html>
-
+```
